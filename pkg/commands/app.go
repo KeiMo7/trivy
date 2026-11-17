@@ -286,6 +286,7 @@ func NewImageCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
 		flag.NewRegoFlagGroup(),
 		reportFlagGroup,
 		scanFlagGroup,
+		flag.NewObserveFlagGroup(),
 		flag.NewSecretFlagGroup(),
 		flag.NewVulnerabilityFlagGroup(),
 	}
@@ -368,6 +369,7 @@ func NewFilesystemCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
 		flag.NewRegoFlagGroup(),
 		reportFlagGroup,
 		flag.NewScanFlagGroup(),
+		flag.NewObserveFlagGroup(),
 		flag.NewSecretFlagGroup(),
 		flag.NewVulnerabilityFlagGroup(),
 	}
@@ -434,6 +436,7 @@ func NewRootfsCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
 		flag.NewRegoFlagGroup(),
 		reportFlagGroup,
 		flag.NewScanFlagGroup(),
+		flag.NewObserveFlagGroup(),
 		flag.NewSecretFlagGroup(),
 		flag.NewVulnerabilityFlagGroup(),
 	}
@@ -498,6 +501,7 @@ func NewRepositoryCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
 		flag.NewClientFlags(), // for client/server mode
 		reportFlagGroup,
 		scanFlagGroup,
+		flag.NewObserveFlagGroup(),
 		flag.NewSecretFlagGroup(),
 		flag.NewVulnerabilityFlagGroup(),
 		flag.NewRepoFlagGroup(),
@@ -552,6 +556,7 @@ func NewConvertCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
 	convertFlags := flag.Flags{
 		globalFlags,
 		scanFlagGroup,
+		flag.NewObserveFlagGroup(),
 		flag.NewReportFlagGroup(),
 	}
 
@@ -613,6 +618,7 @@ func NewClientCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
 		remoteFlags,
 		flag.NewReportFlagGroup(),
 		flag.NewScanFlagGroup(),
+		flag.NewObserveFlagGroup(),
 		flag.NewVulnerabilityFlagGroup(),
 	}
 
@@ -730,6 +736,7 @@ func NewConfigCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
 		},
 		reportFlagGroup,
 		scanFlags,
+		flag.NewObserveFlagGroup(),
 	}
 
 	cmd := &cobra.Command{
@@ -1056,6 +1063,7 @@ func NewKubernetesCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
 		flag.NewRegoFlagGroup(),
 		reportFlagGroup,
 		scanFlags,
+		flag.NewObserveFlagGroup(),
 		flag.NewSecretFlagGroup(),
 		flag.NewRegistryFlagGroup(),
 		flag.NewVulnerabilityFlagGroup(),
@@ -1126,6 +1134,7 @@ func NewVMCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
 		flag.NewClientFlags(), // for client/server mode
 		reportFlagGroup,
 		flag.NewScanFlagGroup(),
+		flag.NewObserveFlagGroup(),
 		flag.NewSecretFlagGroup(),
 		flag.NewVulnerabilityFlagGroup(),
 		&flag.AWSFlagGroup{
@@ -1217,6 +1226,7 @@ func NewSBOMCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
 		flag.NewRegistryFlagGroup(), // for DBs in private registries
 		reportFlagGroup,
 		scanFlagGroup,
+		flag.NewObserveFlagGroup(),
 		flag.NewVulnerabilityFlagGroup(),
 		licenseFlagGroup,
 	}

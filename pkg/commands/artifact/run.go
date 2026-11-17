@@ -32,6 +32,7 @@ import (
 	"github.com/aquasecurity/trivy/pkg/misconf"
 	"github.com/aquasecurity/trivy/pkg/module"
 	"github.com/aquasecurity/trivy/pkg/notification"
+	"github.com/aquasecurity/trivy/pkg/observe"
 	"github.com/aquasecurity/trivy/pkg/policy"
 	pkgReport "github.com/aquasecurity/trivy/pkg/report"
 	"github.com/aquasecurity/trivy/pkg/result"
@@ -104,6 +105,10 @@ type runner struct {
 
 	// WASM modules
 	module *module.Manager
+
+	// progressCallback, when set together with enabled observability, receives
+	// throttled progress events. Nil preserves the default behavior.
+	progressCallback observe.ProgressCallback
 }
 
 type RunnerOption func(*runner)
@@ -113,6 +118,16 @@ type RunnerOption func(*runner)
 func WithInitializeService(f InitializeScanService) RunnerOption {
 	return func(r *runner) {
 		r.initializeScanService = f
+	}
+}
+
+// WithProgressCallback enables runtime observability and registers a progress
+// callback. When callback is nil the option is a no-op and the default scan
+// behavior is preserved. This is intended for library-style embedders; the CLI
+// surfaces the same capability through the --observe-progress flag.
+func WithProgressCallback(cb observe.ProgressCallback) RunnerOption {
+	return func(r *runner) {
+		r.progressCallback = cb
 	}
 }
 
@@ -701,17 +716,43 @@ func (r *runner) scan(ctx context.Context, opts flag.Options, initializeService 
 	if err != nil {
 		return types.Report{}, err
 	}
-	s, cleanup, err := initializeService(ctx, scannerConfig)
-	if err != nil {
-		return types.Report{}, xerrors.Errorf("unable to initialize a scan service: %w", err)
-	}
-	defer cleanup()
 
-	report, err := s.ScanArtifact(ctx, scanOptions)
-	if err != nil {
-		return types.Report{}, xerrors.Errorf("scan failed: %w", err)
+	// Opt-in observability: only create a tracker when explicitly enabled, so
+	// the context and error types stay untouched on the default path.
+	observabilityEnabled := opts.ObserveOptions.Enabled
+	if opts.ObserveOptions.Enabled {
+		cb := r.progressCallback
+		if cb == nil {
+			cb = observe.NewLogCallback()
+		}
+		tracker := observe.NewTracker(observe.Options{
+			Callback: cb,
+			Interval: opts.ObserveOptions.Interval,
+		})
+		ctx = observe.WithTracker(ctx, tracker)
 	}
-	return report, nil
+
+	var report types.Report
+	runErr := observe.Run(ctx, "scan_artifact", scannerConfig.Target, func(ctx context.Context) error {
+		s, cleanup, err := initializeService(ctx, scannerConfig)
+		if err != nil {
+			if observabilityEnabled {
+				return observe.WrapError("init_service", scannerConfig.Target, err, nil)
+			}
+			return xerrors.Errorf("unable to initialize a scan service: %w", err)
+		}
+		defer cleanup()
+
+		report, err = s.ScanArtifact(ctx, scanOptions)
+		if err != nil {
+			if observabilityEnabled {
+				return observe.WrapError("scan_artifact", scannerConfig.Target, err, nil)
+			}
+			return xerrors.Errorf("scan failed: %w", err)
+		}
+		return nil
+	})
+	return report, runErr
 }
 
 func initMisconfScannerOption(ctx context.Context, opts flag.Options) (misconf.ScannerOption, error) {

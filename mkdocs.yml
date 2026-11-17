@@ -133,6 +133,8 @@ nav:
           - Reporting: guide/configuration/reporting.md
           - Cache: guide/configuration/cache.md
           - Databases: guide/configuration/db.md
+          - Runtime Observability: guide/configuration/observability.md
+          - Observability Design Notes: guide/configuration/observability-design.md
           - Others: guide/configuration/others.md
       - Supply Chain:
           - SBOM: guide/supply-chain/sbom.md

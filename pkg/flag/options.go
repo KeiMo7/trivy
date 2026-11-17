@@ -422,6 +422,7 @@ type Options struct {
 	LicenseOptions
 	MisconfOptions
 	ModuleOptions
+	ObserveOptions
 	PackageOptions
 	RegistryOptions
 	RegoOptions
@@ -807,6 +808,7 @@ func HiddenFlags() []string {
 		NewLicenseFlagGroup(),
 		NewMisconfFlagGroup(),
 		NewModuleFlagGroup(),
+		NewObserveFlagGroup(),
 		NewPackageFlagGroup(),
 		NewRegistryFlagGroup(),
 		NewRegoFlagGroup(),

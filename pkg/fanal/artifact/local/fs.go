@@ -26,6 +26,7 @@ import (
 	"github.com/aquasecurity/trivy/pkg/fanal/types"
 	"github.com/aquasecurity/trivy/pkg/fanal/walker"
 	"github.com/aquasecurity/trivy/pkg/log"
+	"github.com/aquasecurity/trivy/pkg/observe"
 	"github.com/aquasecurity/trivy/pkg/semaphore"
 	"github.com/aquasecurity/trivy/pkg/utils/fsutils"
 	"github.com/aquasecurity/trivy/pkg/uuid"
@@ -167,6 +168,13 @@ func extractGitInfo(dir string) (bool, artifact.RepoMetadata, error) {
 }
 
 func (a Artifact) Inspect(ctx context.Context) (artifact.Reference, error) {
+	// Filesystem/repository scans walk the tree as a stream, so the total is
+	// unknown up front. The tracker still reports monotonically increasing
+	// progress with Total == 0.
+	if tracker := observe.FromContext(ctx); tracker != nil {
+		tracker.SetTotal(observe.StageFiles, 0)
+	}
+
 	// Calculate cache key
 	cacheKey, err := a.calcCacheKey()
 	if err != nil {
@@ -323,6 +331,12 @@ func (a Artifact) analyzeWithTraversal(ctx context.Context, root, relativePath s
 
 	return a.walker.Walk(filepath.Join(root, relativePath), a.artifactOption.WalkerOption, func(filePath string, info os.FileInfo, opener analyzer.Opener) error {
 		filePath = path.Join(relativePath, filePath)
+		if tracker := observe.FromContext(ctx); tracker != nil {
+			tracker.Add(1)
+			if info != nil {
+				tracker.AddBytes(info.Size())
+			}
+		}
 		if err := a.analyzer.AnalyzeFile(ctx, eg, limit, result, root, filePath, info, opener, nil, opts); err != nil {
 			return xerrors.Errorf("analyze file (%s): %w", filePath, err)
 		}

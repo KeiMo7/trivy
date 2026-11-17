@@ -26,6 +26,7 @@ import (
 	"github.com/aquasecurity/trivy/pkg/fanal/types"
 	"github.com/aquasecurity/trivy/pkg/fanal/walker"
 	"github.com/aquasecurity/trivy/pkg/log"
+	"github.com/aquasecurity/trivy/pkg/observe"
 	"github.com/aquasecurity/trivy/pkg/parallel"
 	"github.com/aquasecurity/trivy/pkg/semaphore"
 	trivyTypes "github.com/aquasecurity/trivy/pkg/types"
@@ -87,6 +88,7 @@ func NewArtifact(img types.Image, c cache.ArtifactCache, opt artifact.Option) (a
 }
 
 func (a Artifact) Inspect(ctx context.Context) (ref artifact.Reference, err error) {
+	tracker := observe.FromContext(ctx)
 	imageID, err := a.image.ID()
 	if err != nil {
 		return artifact.Reference{}, xerrors.Errorf("unable to get the image ID: %w", err)
@@ -100,6 +102,11 @@ func (a Artifact) Inspect(ctx context.Context) (ref artifact.Reference, err erro
 
 	diffIDs := a.diffIDs(configFile)
 	a.logger.Debug("Detected diff ID", log.Any("diff_ids", diffIDs))
+	if tracker != nil {
+		// Layer count is known up front for container images, so progress can
+		// report a real total even for very large images.
+		tracker.SetTotal(observe.StageImageLayers, int64(len(diffIDs)))
+	}
 
 	defer func() {
 		if rerr := os.RemoveAll(a.layerCacheDir); rerr != nil {
@@ -393,6 +400,7 @@ func (a Artifact) saveLayer(diffID string) (int64, error) {
 func (a Artifact) inspect(ctx context.Context, missingImage string, layerKeys, baseDiffIDs []string,
 	layerKeyMap map[string]types.Layer, configFile *v1.ConfigFile) error {
 
+	tracker := observe.FromContext(ctx)
 	var osFound types.OS
 	p := parallel.NewPipeline(a.artifactOption.Parallel, false, layerKeys, func(ctx context.Context,
 		layerKey string) (any, error) {
@@ -417,6 +425,11 @@ func (a Artifact) inspect(ctx context.Context, missingImage string, layerKeys, b
 		// To avoid race condition, merge OS info in the onResult function (main goroutine)
 		osInfo := res.(types.OS)
 		osFound.Merge(osInfo)
+		// onResult runs on the pipeline's consuming goroutine, so counter
+		// updates stay ordered and race-free.
+		if tracker != nil {
+			tracker.Add(1)
+		}
 		return nil
 	})
 
@@ -506,6 +519,10 @@ func (a Artifact) inspectLayer(ctx context.Context, layer types.Layer, disabled 
 	// Read the remaining bytes for blocking factor to calculate the correct layer size
 	// cf. https://www.reddit.com/r/devops/comments/1gwpvrm/a_deep_dive_into_the_tar_format/
 	_, _ = io.Copy(io.Discard, cr)
+
+	if tracker := observe.FromContext(ctx); tracker != nil {
+		tracker.AddBytes(cr.BytesRead())
+	}
 
 	// Sort the analysis result for consistent results
 	result.Sort()

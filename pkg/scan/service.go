@@ -13,6 +13,7 @@ import (
 	ftypes "github.com/aquasecurity/trivy/pkg/fanal/types"
 	"github.com/aquasecurity/trivy/pkg/fingerprint"
 	"github.com/aquasecurity/trivy/pkg/log"
+	"github.com/aquasecurity/trivy/pkg/observe"
 	"github.com/aquasecurity/trivy/pkg/report"
 	"github.com/aquasecurity/trivy/pkg/types"
 	"github.com/aquasecurity/trivy/pkg/uuid"
@@ -49,10 +50,12 @@ func NewService(backend Backend, ar artifact.Artifact) Service {
 // It first inspects the artifact to gather necessary information,
 // then delegates the actual scanning to the configured backend implementation.
 func (s Service) ScanArtifact(ctx context.Context, options types.ScanOptions) (types.Report, error) {
-	artifactInfo, err := s.artifact.Inspect(ctx)
-	if err != nil {
-		return types.Report{}, xerrors.Errorf("failed analysis: %w", err)
-	}
+	tracker := observe.FromContext(ctx)
+
+	var artifactInfo artifact.Reference
+	// Register cleanup before Inspect so resources are released even when the
+	// scan is canceled (or Inspect fails) midway. Clean implementations must
+	// tolerate a zero-value Reference.
 	defer func() {
 		if err := s.artifact.Clean(artifactInfo); err != nil {
 			log.Warn("Failed to clean the artifact",
@@ -60,8 +63,23 @@ func (s Service) ScanArtifact(ctx context.Context, options types.ScanOptions) (t
 		}
 	}()
 
+	var err error
+	artifactInfo, err = s.artifact.Inspect(ctx)
+	if err != nil {
+		if tracker != nil && observe.IsCanceled(err) {
+			return types.Report{}, &observe.CanceledError{Operation: "inspect"}
+		}
+		return types.Report{}, xerrors.Errorf("failed analysis: %w", err)
+	}
+	if tracker != nil {
+		tracker.Finish()
+	}
+
 	scanResponse, err := s.backend.Scan(ctx, artifactInfo.Name, artifactInfo.ID, artifactInfo.BlobIDs, options)
 	if err != nil {
+		if tracker != nil && observe.IsCanceled(err) {
+			return types.Report{}, &observe.CanceledError{Operation: "scan"}
+		}
 		return types.Report{}, xerrors.Errorf("scan failed: %w", err)
 	}
 
