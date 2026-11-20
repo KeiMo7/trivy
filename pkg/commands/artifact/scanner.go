@@ -36,7 +36,13 @@ type newArtifactFunc func(cache.ArtifactCache) (artifact.Artifact, func(), error
 // Target: Container image (e.g., alpine:3.15, gcr.io/project/image:tag)
 // Mode: Standalone (local scanning without server)
 func imageStandaloneScanService(ctx context.Context, conf ScannerConfig) (scan.Service, func(), error) {
-	return createLocalService(conf, func(c cache.ArtifactCache) (artifact.Artifact, func(), error) {
+	return createLocalService(conf, newContainerImageArtifact(ctx, conf))
+}
+
+// newContainerImageArtifact builds a registry-backed container image artifact.
+// Extracted so batch mode can reuse the exact construction over a shared cache.
+func newContainerImageArtifact(ctx context.Context, conf ScannerConfig) newArtifactFunc {
+	return func(c cache.ArtifactCache) (artifact.Artifact, func(), error) {
 		img, cleanupImage, err := image.NewContainerImage(ctx, conf.Target, conf.ArtifactOption.ImageOption)
 		if err != nil {
 			return nil, nil, xerrors.Errorf("unable to initialize container image: %w", err)
@@ -48,14 +54,19 @@ func imageStandaloneScanService(ctx context.Context, conf ScannerConfig) (scan.S
 			return nil, nil, xerrors.Errorf("unable to initialize artifact: %w", err)
 		}
 		return art, cleanupImage, nil
-	})
+	}
 }
 
 // archiveStandaloneScanService scans container image archives
 // Target: Image archive file (e.g., alpine.tar created by 'docker save')
 // Mode: Standalone (local scanning without server)
 func archiveStandaloneScanService(_ context.Context, conf ScannerConfig) (scan.Service, func(), error) {
-	return createLocalService(conf, func(c cache.ArtifactCache) (artifact.Artifact, func(), error) {
+	return createLocalService(conf, newArchiveImageArtifact(conf))
+}
+
+// newArchiveImageArtifact builds a local tarball image artifact.
+func newArchiveImageArtifact(conf ScannerConfig) newArtifactFunc {
+	return func(c cache.ArtifactCache) (artifact.Artifact, func(), error) {
 		img, err := image.NewArchiveImage(conf.Target)
 		if err != nil {
 			return nil, nil, xerrors.Errorf("unable to initialize archive image: %w", err)
@@ -66,7 +77,7 @@ func archiveStandaloneScanService(_ context.Context, conf ScannerConfig) (scan.S
 			return nil, nil, xerrors.Errorf("unable to initialize artifact: %w", err)
 		}
 		return art, func() {}, nil
-	})
+	}
 }
 
 // filesystemStandaloneScanService scans local filesystems and directories
@@ -249,6 +260,24 @@ func createLocalService(conf ScannerConfig, newArtifact newArtifactFunc) (scan.S
 		return scan.Service{}, nil, xerrors.Errorf("unable to initialize cache: %w", err)
 	}
 
+	service, cleanupArtifact, err := newLocalServiceWithCache(conf, c, newArtifact)
+	if err != nil {
+		cleanupCache()
+		return scan.Service{}, nil, err
+	}
+
+	return service, func() {
+		cleanupArtifact()
+		cleanupCache()
+	}, nil
+}
+
+// newLocalServiceWithCache builds the local scan machinery over a caller-owned
+// cache. It is shared by every image in a batch: opening the bbolt-backed fs
+// cache once avoids the exclusive file lock that makes one cache-per-image
+// fail under concurrency. The caller owns the cache lifecycle and must not run
+// the returned cleanup after the cache has been closed elsewhere.
+func newLocalServiceWithCache(conf ScannerConfig, c cache.Cache, newArtifact newArtifactFunc) (scan.Service, func(), error) {
 	app := applier.NewApplier(c)
 	osScanner := ospkg.NewScanner()
 	langScanner := langpkg.NewScanner()
@@ -257,14 +286,10 @@ func createLocalService(conf ScannerConfig, newArtifact newArtifactFunc) (scan.S
 
 	art, cleanupArtifact, err := newArtifact(c)
 	if err != nil {
-		cleanupCache()
 		return scan.Service{}, nil, xerrors.Errorf("unable to initialize artifact: %w", err)
 	}
 
-	return scan.NewService(service, art), func() {
-		cleanupArtifact()
-		cleanupCache()
-	}, nil
+	return scan.NewService(service, art), cleanupArtifact, nil
 }
 
 // createRemoteService creates a remote scanning service using manual dependency injection.

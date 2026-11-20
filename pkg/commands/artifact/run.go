@@ -102,6 +102,10 @@ type runner struct {
 	versionChecker        *notification.VersionChecker
 	dbOpen                bool
 
+	// closeHooks holds additional cleanup registered by specialized entry
+	// points, e.g. the shared batch cache. They run before the standard close.
+	closeHooks []func() error
+
 	// WASM modules
 	module *module.Manager
 }
@@ -176,6 +180,14 @@ func NewRunner(ctx context.Context, cliOptions flag.Options, targetKind TargetKi
 // Close closes everything
 func (r *runner) Close(ctx context.Context) error {
 	var errs error
+	// Specialized cleanups first (e.g. the shared batch cache), so the cache is
+	// still open while any standard teardown runs.
+	for i := len(r.closeHooks) - 1; i >= 0; i-- {
+		if err := r.closeHooks[i](); err != nil {
+			errs = multierror.Append(errs, err)
+		}
+	}
+
 	if r.dbOpen {
 		if err := db.Close(); err != nil {
 			errs = multierror.Append(errs, err)

@@ -272,6 +272,8 @@ func NewImageCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
 	scanners.Values = append(scanners.Values, string(types.CryptoScanner))
 	scanFlagGroup.Scanners = scanners
 
+	batchFlagGroup := flag.NewBatchFlagGroup()
+
 	imageFlags := flag.Flags{
 		globalFlags,
 		flag.NewCacheFlagGroup(),
@@ -288,10 +290,11 @@ func NewImageCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
 		scanFlagGroup,
 		flag.NewSecretFlagGroup(),
 		flag.NewVulnerabilityFlagGroup(),
+		batchFlagGroup,
 	}
 
 	cmd := &cobra.Command{
-		Use:     "image [flags] IMAGE_NAME",
+		Use:     "image [flags] IMAGE_NAME [IMAGE_NAME...]",
 		Aliases: []string{"i"},
 		GroupID: groupScanning,
 		Short:   "Scan a container image",
@@ -333,6 +336,18 @@ func NewImageCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
 			options, err := imageFlags.ToOptions(args)
 			if err != nil {
 				return xerrors.Errorf("flag error: %w", err)
+			}
+			if options.Enabled {
+				summary, err := artifact.RunBatch(cmd.Context(), options, artifact.TargetContainerImage)
+				if err != nil {
+					return err
+				}
+				// Batch semantics: infrastructure success even if some images
+				// failed; the per-image conclusions and summary carry the
+				// details. A non-zero exit code is only applied via the
+				// existing --exit-code mechanism when an image produced
+				// findings, mirroring the single-image behavior.
+				return artifact.ExitBatch(cmd.Context(), options, summary)
 			}
 			return artifact.Run(cmd.Context(), options, artifact.TargetContainerImage)
 		},
@@ -1494,7 +1509,13 @@ func validateArgs(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	if len(args) == 0 && viper.GetString(flag.InputFlag.ConfigName) == "" && cmd.Name() != "kubernetes" {
+	// Batch mode with a batch file is allowed to have no positional image
+	// argument; the image list is read from the file instead.
+	batchWithFile := cmd.Name() == "image" && viper.GetBool(flag.BatchFlag.ConfigName) &&
+		viper.GetString(flag.BatchFileFlag.ConfigName) != ""
+
+	if len(args) == 0 && viper.GetString(flag.InputFlag.ConfigName) == "" && cmd.Name() != "kubernetes" &&
+		!batchWithFile {
 		if err := cmd.Help(); err != nil {
 			return err
 		}
@@ -1504,6 +1525,11 @@ func validateArgs(cmd *cobra.Command, args []string) error {
 		}
 		return xerrors.New(`Require at least 1 argument`)
 	} else if cmd.Name() != "kubernetes" && len(args) > 1 {
+		// Batch mode accepts many image references in one invocation. The
+		// single-image path keeps its strict one-target validation.
+		if cmd.Name() == "image" && viper.GetBool(flag.BatchFlag.ConfigName) {
+			return nil
+		}
 		if err := cmd.Help(); err != nil {
 			return err
 		}

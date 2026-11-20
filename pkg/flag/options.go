@@ -414,6 +414,7 @@ type Flags []FlagGroup
 type Options struct {
 	GlobalOptions
 	AWSOptions
+	BatchOptions
 	CacheOptions
 	CleanOptions
 	DBOptions
@@ -627,6 +628,11 @@ func (o *Options) OutputWriter(ctx context.Context) (io.Writer, func() error, er
 // GetUsedFlags returns the explicitly set flags for the options.
 func (o *Options) GetUsedFlags() []Flagger {
 	return o.usedFlags
+}
+
+// Args returns the positional arguments captured during flag parsing.
+func (o *Options) Args() []string {
+	return o.args
 }
 
 func (o *Options) outputPluginWriter(ctx context.Context) (writer io.Writer, cleanup func() error, err error) {
