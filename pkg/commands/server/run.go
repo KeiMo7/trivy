@@ -34,8 +34,18 @@ func Run(ctx context.Context, opts flag.Options) (err error) {
 	defer cleanup()
 
 	// download the database file
-	if err = operation.DownloadDB(ctx, opts.AppVersion, opts.CacheDir, opts.DBRepositories,
-		true, opts.SkipDBUpdate, opts.RegistryOpts()); err != nil {
+	if err = operation.DownloadDBWithOptions(ctx, operation.DBOptions{
+		CacheDir:     opts.CacheDir,
+		AppVersion:   opts.AppVersion,
+		Repositories: opts.DBRepositories,
+		Registry:     opts.RegistryOpts(),
+		Quiet:        true,
+		SkipUpdate:   opts.SkipDBUpdate,
+		Store: db.StoreOptions{
+			Retention: opts.DBRetention,
+			MaxSize:   opts.DBMaxSize,
+		},
+	}); err != nil {
 		return err
 	}
 
@@ -43,7 +53,18 @@ func Run(ctx context.Context, opts flag.Options) (err error) {
 		return nil
 	}
 
-	if err = db.Init(db.Dir(opts.CacheDir)); err != nil {
+	dbDir, release, err := db.Resolve(ctx, opts.CacheDir, "")
+	if err != nil {
+		return xerrors.Errorf("error in vulnerability DB initialization: %w", err)
+	}
+	// The server keeps the database open for its whole lifetime and performs
+	// its own hot update (closing the database and waiting for in-flight
+	// requests first). Holding the store's shared lock here would block the
+	// update worker's exclusive lock, so it is dropped after the version has
+	// been verified and opened. The server process itself serialises eviction
+	// with the update worker's request wait group.
+	release()
+	if err = db.Init(dbDir); err != nil {
 		return xerrors.Errorf("error in vulnerability DB initialization: %w", err)
 	}
 

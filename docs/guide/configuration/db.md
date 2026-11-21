@@ -126,3 +126,20 @@ $ trivy clean --vuln-db --java-db
 2024-06-24T11:42:31+06:00       INFO    Removing vulnerability database...
 2024-06-24T11:42:31+06:00       INFO    Removing Java database...
 ```
+
+### Versioned database store
+
+Trivy keeps the vulnerability database as a set of independently verifiable
+versions and switches between them atomically. Previous versions are retained so
+that you can roll back or run a scan with a specific database version.
+
+```
+trivy db list                     # list retained versions
+trivy image --db-version <ID> ... # scan with a specific version
+trivy db rollback                 # switch back to the previous version
+trivy db export --output db.tar.gz
+```
+
+Retention is configurable with `--db-retention` and `--db-max-size`.
+For details, including offline transfer and delta packages, see
+[Versioned Vulnerability Database Store](./db-versions.md).

@@ -87,10 +87,16 @@ func NewVersionInfo(cacheDir string, opts ...VersionOption) types.VersionInfo {
 		}
 	}
 
+	var dbVersion string
+	if m, ok := db.ActiveManifest(cacheDir); ok {
+		dbVersion = m.Version
+	}
+
 	return types.VersionInfo{
-		Version:         app.Version(),
-		VulnerabilityDB: dbMeta,
-		JavaDB:          javadbMeta,
-		CheckBundle:     pbMeta,
+		Version:                app.Version(),
+		VulnerabilityDB:        dbMeta,
+		JavaDB:                 javadbMeta,
+		CheckBundle:            pbMeta,
+		VulnerabilityDBVersion: dbVersion,
 	}
 }

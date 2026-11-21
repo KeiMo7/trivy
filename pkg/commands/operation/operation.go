@@ -21,23 +21,57 @@ import (
 
 var mu sync.Mutex
 
-// DownloadDB downloads the DB
+// DBOptions collects the DB-related options required to update and use the
+// versioned database store.
+type DBOptions struct {
+	CacheDir     string
+	AppVersion   string
+	Repositories []name.Reference
+	Registry     ftypes.RegistryOptions
+	Quiet        bool
+	SkipUpdate   bool
+
+	// Pin selects a specific installed version for this scan. The active
+	// version marker is not changed.
+	Pin string
+
+	Store db.StoreOptions
+}
+
+// DownloadDB downloads the DB using the default store options.
 func DownloadDB(ctx context.Context, appVersion, cacheDir string, dbRepositories []name.Reference, quiet, skipUpdate bool,
 	opt ftypes.RegistryOptions) error {
+	return DownloadDBWithOptions(ctx, DBOptions{
+		CacheDir:     cacheDir,
+		AppVersion:   appVersion,
+		Repositories: dbRepositories,
+		Registry:     opt,
+		Quiet:        quiet,
+		SkipUpdate:   skipUpdate,
+	})
+}
+
+// DownloadDBWithOptions makes sure a verified database version is available.
+// When an update is needed it is installed and activated atomically; when it is
+// not, the existing active version is left untouched.
+func DownloadDBWithOptions(ctx context.Context, opts DBOptions) error {
 	mu.Lock()
 	defer mu.Unlock()
 
 	ctx = log.WithContextPrefix(ctx, log.PrefixVulnerabilityDB)
-	dbDir := db.Dir(cacheDir)
-	client := db.NewClient(dbDir, quiet, db.WithDBRepository(dbRepositories))
-	needsUpdate, err := client.NeedsUpdate(ctx, appVersion, skipUpdate)
+	dbDir := db.Dir(opts.CacheDir)
+	client := db.NewClient(dbDir, opts.Quiet,
+		db.WithDBRepository(opts.Repositories),
+		db.WithStoreOptions(opts.Store))
+
+	needsUpdate, err := client.NeedsUpdate(ctx, opts.AppVersion, opts.SkipUpdate)
 	if err != nil {
 		return xerrors.Errorf("database error: %w", err)
 	}
 
 	if needsUpdate {
 		log.InfoContext(ctx, "Need to update DB")
-		if err = client.Download(ctx, dbDir, opt); err != nil {
+		if err = client.Download(ctx, dbDir, opts.Registry); err != nil {
 			return xerrors.Errorf("failed to download vulnerability DB: %w", err)
 		}
 	}

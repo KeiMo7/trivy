@@ -227,6 +227,14 @@ func (f *Flag[T]) allowedValue(v any) bool {
 	return true
 }
 
+// MarkPersistent makes the flag persistent so that subcommands inherit it.
+func (f *Flag[T]) MarkPersistent() {
+	if f == nil {
+		return
+	}
+	f.Persistent = true
+}
+
 func (f *Flag[T]) GetName() string {
 	return f.Name
 }
@@ -356,6 +364,10 @@ func (f *Flag[T]) Bind(cmd *cobra.Command) error {
 		// Lookup local persistent flags
 		flag = cmd.PersistentFlags().Lookup(f.Name)
 	}
+	if flag == nil {
+		// Lookup persistent flags inherited from parent commands
+		flag = cmd.InheritedFlags().Lookup(f.Name)
+	}
 	if err := viper.BindPFlag(f.ConfigName, flag); err != nil {
 		return xerrors.Errorf("bind flag error: %w", err)
 	}
@@ -393,6 +405,8 @@ type FlagGroup interface {
 }
 
 type Flagger interface {
+	// MarkPersistent makes the flag persistent (inherited by subcommands).
+	MarkPersistent()
 	GetName() string
 	GetConfigName() string
 	GetDefaultValue() any

@@ -3,6 +3,7 @@ package flag
 import (
 	"strconv"
 
+	"github.com/docker/go-units"
 	"github.com/google/go-containerregistry/pkg/name"
 	"golang.org/x/xerrors"
 
@@ -68,6 +69,22 @@ var (
 		Usage:      "deprecated",
 		Deprecated: `This flag is ignored.`,
 	}
+	DBVersionFlag = Flag[string]{
+		Name:       "db-version",
+		ConfigName: "db.version",
+		Usage:      "use a specific locally retained vulnerability database version instead of the active one",
+	}
+	DBRetentionFlag = Flag[int]{
+		Name:       "db-retention",
+		ConfigName: "db.retention",
+		Default:    2,
+		Usage:      "number of vulnerability database versions to keep for rollback",
+	}
+	DBMaxSizeFlag = Flag[string]{
+		Name:       "db-max-size",
+		ConfigName: "db.max-size",
+		Usage:      "maximum total size of retained vulnerability database versions (e.g. 2GB); oldest versions are evicted first",
+	}
 )
 
 // DBFlagGroup composes common printer flag structs used for commands requiring DB logic.
@@ -81,6 +98,9 @@ type DBFlagGroup struct {
 	DBRepositories     *Flag[[]string]
 	JavaDBRepositories *Flag[[]string]
 	Light              *Flag[bool] // deprecated
+	DBVersion          *Flag[string]
+	DBRetention        *Flag[int]
+	DBMaxSize          *Flag[string]
 }
 
 type DBOptions struct {
@@ -92,6 +112,9 @@ type DBOptions struct {
 	NoProgress         bool
 	DBRepositories     []name.Reference
 	JavaDBRepositories []name.Reference
+	DBVersion          string
+	DBRetention        int
+	DBMaxSize          int64
 }
 
 // NewDBFlagGroup returns a default DBFlagGroup
@@ -106,6 +129,9 @@ func NewDBFlagGroup() *DBFlagGroup {
 		NoProgress:         NoProgressFlag.Clone(),
 		DBRepositories:     DBRepositoryFlag.Clone(),
 		JavaDBRepositories: JavaDBRepositoryFlag.Clone(),
+		DBVersion:          DBVersionFlag.Clone(),
+		DBRetention:        DBRetentionFlag.Clone(),
+		DBMaxSize:          DBMaxSizeFlag.Clone(),
 	}
 }
 
@@ -124,6 +150,9 @@ func (f *DBFlagGroup) Flags() []Flagger {
 		f.DBRepositories,
 		f.JavaDBRepositories,
 		f.Light,
+		f.DBVersion,
+		f.DBRetention,
+		f.DBMaxSize,
 	}
 }
 
@@ -160,6 +189,18 @@ func (f *DBFlagGroup) ToOptions(opts *Options) error {
 		javaDBRepositories = append(javaDBRepositories, ref)
 	}
 
+	maxSize, err := parseSize(f.DBMaxSize.Value())
+	if err != nil {
+		return xerrors.Errorf("invalid --db-max-size: %w", err)
+	}
+	retention := f.DBRetention.Value()
+	if retention < 1 {
+		if f.DBRetention.IsSet() {
+			return xerrors.New("--db-retention must be at least 1")
+		}
+		retention = DBRetentionFlag.Default
+	}
+
 	opts.DBOptions = DBOptions{
 		Reset:              f.Reset.Value(),
 		DownloadDBOnly:     downloadDBOnly,
@@ -169,8 +210,30 @@ func (f *DBFlagGroup) ToOptions(opts *Options) error {
 		NoProgress:         f.NoProgress.Value(),
 		DBRepositories:     dbRepositories,
 		JavaDBRepositories: javaDBRepositories,
+		DBVersion:          f.DBVersion.Value(),
+		DBRetention:        retention,
+		DBMaxSize:          maxSize,
+	}
+	if f.DBVersion.IsSet() && downloadDBOnly {
+		return xerrors.New("--db-version and --download-db-only cannot be specified together")
 	}
 	return nil
+}
+
+// parseSize parses a human-readable size such as "2GB" or "512MiB". An empty
+// string means no limit.
+func parseSize(s string) (int64, error) {
+	if s == "" {
+		return 0, nil
+	}
+	size, err := units.FromHumanSize(s)
+	if err != nil {
+		return 0, err
+	}
+	if size < 0 {
+		return 0, xerrors.New("size must not be negative")
+	}
+	return size, nil
 }
 
 func parseRepository(repo string, dbSchemaVersion int) (name.Reference, error) {

@@ -114,6 +114,9 @@ db:
   # Same as '--skip-java-db-update'
   java-skip-update: false
 
+  # Same as '--db-max-size'
+  max-size: ""
+
   # Same as '--no-progress'
   no-progress: false
 
@@ -122,8 +125,14 @@ db:
    - mirror.gcr.io/aquasec/trivy-db:2
    - ghcr.io/aquasecurity/trivy-db:2
 
+  # Same as '--db-retention'
+  retention: 2
+
   # Same as '--skip-db-update'
   skip-update: false
+
+  # Same as '--db-version'
+  version: ""
 
 ```
 ## Image options

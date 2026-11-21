@@ -21,6 +21,13 @@ func main() {
 			os.Exit(exitError.Code)
 		}
 
+		// Operational failures such as an unusable, mismatched, or
+		// unrollbackable vulnerability database carry their own exit code.
+		if coder, ok := errors.AsType[types.ExitCoder](err); ok {
+			log.Error("Error", log.Err(err))
+			os.Exit(coder.ExitCode())
+		}
+
 		if userErr, ok := errors.AsType[*types.UserError](err); ok {
 			log.Fatal("Error", log.Err(userErr))
 		}

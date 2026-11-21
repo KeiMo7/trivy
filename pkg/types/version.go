@@ -28,12 +28,20 @@ type VersionInfo struct {
 	VulnerabilityDB *metadata.Metadata `json:",omitempty"`
 	JavaDB          *metadata.Metadata `json:",omitempty"`
 	CheckBundle     *BundleMetadata    `json:",omitempty"`
+
+	// VulnerabilityDBVersion is the identifier of the installed database
+	// version (as accepted by --db-version). It is distinct from the DB
+	// metadata version, which is the schema version.
+	VulnerabilityDBVersion string `json:",omitempty"`
 }
 
 func (v VersionInfo) String() string {
 	output := fmt.Sprintf("Version: %s\n", v.Version)
 	if v.VulnerabilityDB != nil {
 		output += formatDBMetadata("Vulnerability DB", *v.VulnerabilityDB)
+		if v.VulnerabilityDBVersion != "" {
+			output += fmt.Sprintf("  VersionID: %s\n", v.VulnerabilityDBVersion)
+		}
 	}
 	if v.JavaDB != nil {
 		output += formatDBMetadata("Java DB", *v.JavaDB)

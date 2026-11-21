@@ -19,7 +19,9 @@ import (
 	"github.com/aquasecurity/trivy/pkg/commands/auth"
 	"github.com/aquasecurity/trivy/pkg/commands/clean"
 	"github.com/aquasecurity/trivy/pkg/commands/convert"
+	"github.com/aquasecurity/trivy/pkg/commands/dbcommand"
 	"github.com/aquasecurity/trivy/pkg/commands/server"
+	"github.com/aquasecurity/trivy/pkg/db"
 	"github.com/aquasecurity/trivy/pkg/fanal/analyzer"
 	"github.com/aquasecurity/trivy/pkg/flag"
 	k8scommands "github.com/aquasecurity/trivy/pkg/k8s/commands"
@@ -103,6 +105,7 @@ func NewApp() *cobra.Command {
 		NewCleanCommand(globalFlags),
 		NewRegistryCommand(globalFlags),
 		NewVEXCommand(globalFlags),
+		NewDBCommand(globalFlags),
 	)
 
 	if plugins := loadPluginCommands(); len(plugins) > 0 {
@@ -1520,4 +1523,237 @@ func flagErrorFunc(command *cobra.Command, err error) error {
 	}
 	command.Println() // add empty line after list of flags
 	return err
+}
+
+// NewDBCommand returns the 'db' command group for managing the versioned local
+// vulnerability database store.
+func NewDBCommand(globalFlags *flag.GlobalFlagGroup) *cobra.Command {
+	var opts flag.Options
+	var listFormat string
+
+	dbGroup := flag.NewDBFlagGroup()
+	// Only the store-management flags make sense for `trivy db`; the scanning
+	// flags are not applicable to a management command.
+	dbGroup.Reset = nil
+	dbGroup.DownloadDBOnly = nil
+	dbGroup.SkipDBUpdate = nil
+	dbGroup.DownloadJavaDBOnly = nil
+	dbGroup.SkipJavaDBUpdate = nil
+	dbGroup.NoProgress = nil
+	dbGroup.DBRepositories = nil
+	dbGroup.JavaDBRepositories = nil
+	dbGroup.Light = nil
+	dbGroup.DBVersion = nil
+	// These flags live on the parent `db` command but must be visible to its
+	// subcommands, so they are registered as persistent flags.
+	for _, f := range dbGroup.Flags() {
+		f.MarkPersistent()
+	}
+	dbFlags := &flag.Flags{
+		globalFlags,
+		dbGroup,
+	}
+
+	cmd := &cobra.Command{
+		Use:           "db subcommand",
+		GroupID:       groupManagement,
+		Short:         "Manage the local vulnerability database versions",
+		SilenceErrors: true,
+		SilenceUsage:  true,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SetContext(log.WithContextPrefix(cmd.Context(), log.PrefixVulnerabilityDB))
+			if err := dbFlags.Bind(cmd); err != nil {
+				return xerrors.Errorf("flag bind error: %w", err)
+			}
+			var err error
+			opts, err = dbFlags.ToOptions(args)
+			if err != nil {
+				return xerrors.Errorf("flag error: %w", err)
+			}
+			return nil
+		},
+	}
+
+	commandOptions := func(cmd *cobra.Command) dbcommand.Options {
+		return dbcommand.Options{
+			CacheDir: opts.CacheDir,
+			Store: db.StoreOptions{
+				Retention: opts.DBRetention,
+				MaxSize:   opts.DBMaxSize,
+			},
+			Format: strings.ToLower(listFormat),
+			Output: cmd.OutOrStdout(),
+		}
+	}
+
+	listCmd := &cobra.Command{
+		Use:   "list",
+		Short: "List locally retained database versions",
+		Example: `  # List database versions
+  $ trivy db list
+
+  # List versions as JSON
+  $ trivy db list --format json
+`,
+		Args: cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			return dbcommand.List(cmd.Context(), commandOptions(cmd))
+		},
+	}
+	listCmd.Flags().StringVar(&listFormat, "format", "table", "output format (table or json)")
+
+	activateCmd := &cobra.Command{
+		Use:   "activate VERSION",
+		Short: "Make an installed version the active one",
+		Example: `  # Switch to a specific version
+  $ trivy db activate 7ac92b6e54e81046`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dbcommand.Activate(cmd.Context(), commandOptions(cmd), args[0])
+		},
+	}
+
+	rollbackCmd := &cobra.Command{
+		Use:   "rollback [VERSION]",
+		Short: "Switch back to the previous version, or to a specific one",
+		Example: `  # Roll back to the previous version
+  $ trivy db rollback
+
+  # Roll back to a specific version
+  $ trivy db rollback 7ac92b6e54e81046
+`,
+		Args: cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			var target string
+			if len(args) > 0 {
+				target = args[0]
+			}
+			return dbcommand.Rollback(cmd.Context(), commandOptions(cmd), target)
+		},
+	}
+
+	removeCmd := &cobra.Command{
+		Use:   "remove VERSION",
+		Short: "Remove an installed version",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return dbcommand.Remove(cmd.Context(), commandOptions(cmd), args[0])
+		},
+	}
+
+	var importDir string
+	var importActivate bool
+	var importVersion string
+	importCmd := &cobra.Command{
+		Use:   "import",
+		Short: "Import a database directory without contacting a registry",
+		Example: `  # Import a database carried in on removable media and activate it
+  $ trivy db import --input /media/usb/trivy-db --activate
+`,
+		Args: cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			return dbcommand.Import(cmd.Context(), dbcommand.ImportOptions{
+				Options:  commandOptions(cmd),
+				Dir:      importDir,
+				Activate: importActivate,
+				Version:  importVersion,
+			})
+		},
+	}
+	importCmd.Flags().StringVar(&importDir, "input", "", "directory containing trivy.db")
+	importCmd.Flags().BoolVar(&importActivate, "activate", false, "activate the imported version")
+	importCmd.Flags().StringVar(&importVersion, "version", "", "version identifier to record (default: derived from content)")
+
+	var archivePath string
+	var archiveActivate bool
+	importArchiveCmd := &cobra.Command{
+		Use:   "import-archive",
+		Short: "Import a self-verifying database archive",
+		Example: `  # Import a database archive and activate it
+  $ trivy db import-archive --input /media/usb/trivy-db.tar.gz --activate
+`,
+		Args: cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			return dbcommand.ImportArchive(cmd.Context(), dbcommand.ImportArchiveOptions{
+				Options:  commandOptions(cmd),
+				Path:     archivePath,
+				Activate: archiveActivate,
+			})
+		},
+	}
+	importArchiveCmd.Flags().StringVar(&archivePath, "input", "", "path to the database archive")
+	importArchiveCmd.Flags().BoolVar(&archiveActivate, "activate", false, "activate the imported version")
+
+	var exportPath string
+	var exportVersion string
+	exportCmd := &cobra.Command{
+		Use:   "export",
+		Short: "Export a self-verifying database archive for offline transfer",
+		Example: `  # Export the active version
+  $ trivy db export --output /media/usb/trivy-db.tar.gz
+
+  # Export a specific version
+  $ trivy db export --version 7ac92b6e54e81046 --output /media/usb/trivy-db.tar.gz
+`,
+		Args: cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			return dbcommand.Export(cmd.Context(), dbcommand.ExportOptions{
+				Options: commandOptions(cmd),
+				Version: exportVersion,
+				Path:    exportPath,
+			})
+		},
+	}
+	exportCmd.Flags().StringVar(&exportPath, "output", "", "path of the archive to write")
+	exportCmd.Flags().StringVar(&exportVersion, "version", "", "version to export (default: the active version)")
+
+	var deltaPath string
+	var baseDir, targetDir, baseVersion string
+	deltaCmd := &cobra.Command{
+		Use:   "delta subcommand",
+		Short: "Create or apply delta packages",
+	}
+	deltaCreateCmd := &cobra.Command{
+		Use:   "create",
+		Short: "Create a delta package between two database directories",
+		Example: `  $ trivy db delta create --base /media/usb/old-db --target /media/usb/new-db --output new.delta
+`,
+		Args: cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			return dbcommand.CreateDelta(cmd.Context(), dbcommand.DeltaOptions{
+				Options:   commandOptions(cmd),
+				BaseDir:   baseDir,
+				TargetDir: targetDir,
+				DeltaPath: deltaPath,
+			})
+		},
+	}
+	deltaCreateCmd.Flags().StringVar(&baseDir, "base", "", "directory containing the base database")
+	deltaCreateCmd.Flags().StringVar(&targetDir, "target", "", "directory containing the target database")
+	deltaCreateCmd.Flags().StringVar(&deltaPath, "output", "", "path of the delta package to write")
+
+	deltaApplyCmd := &cobra.Command{
+		Use:   "apply",
+		Short: "Apply a delta package on top of a locally installed version",
+		Example: `  $ trivy db delta apply --base 7ac92b6e54e81046 --delta /media/usb/new.delta
+`,
+		Args: cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			return dbcommand.ApplyDelta(cmd.Context(), dbcommand.DeltaOptions{
+				Options:   commandOptions(cmd),
+				Base:      baseVersion,
+				DeltaPath: deltaPath,
+			})
+		},
+	}
+	deltaApplyCmd.Flags().StringVar(&baseVersion, "base", "", "local base version (default: the active version)")
+	deltaApplyCmd.Flags().StringVar(&deltaPath, "delta", "", "path to the delta package")
+
+	deltaCmd.AddCommand(deltaCreateCmd, deltaApplyCmd)
+
+	cmd.AddCommand(listCmd, activateCmd, rollbackCmd, removeCmd, importCmd, importArchiveCmd, exportCmd, deltaCmd)
+	cmd.SetFlagErrorFunc(flagErrorFunc)
+	dbFlags.AddFlags(cmd)
+
+	return cmd
 }

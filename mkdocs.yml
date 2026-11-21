@@ -133,6 +133,7 @@ nav:
           - Reporting: guide/configuration/reporting.md
           - Cache: guide/configuration/cache.md
           - Databases: guide/configuration/db.md
+          - Database Versions: guide/configuration/db-versions.md
           - Others: guide/configuration/others.md
       - Supply Chain:
           - SBOM: guide/supply-chain/sbom.md
@@ -174,6 +175,19 @@ nav:
                   - Overview: guide/references/configuration/cli/trivy.md
                   - Clean: guide/references/configuration/cli/trivy_clean.md
                   - Config: guide/references/configuration/cli/trivy_config.md
+                  - DB:
+                      - DB: guide/references/configuration/cli/trivy_db.md
+                      - DB Activate: guide/references/configuration/cli/trivy_db_activate.md
+                      - DB Delta:
+                          - DB Delta: guide/references/configuration/cli/trivy_db_delta.md
+                          - DB Delta Apply: guide/references/configuration/cli/trivy_db_delta_apply.md
+                          - DB Delta Create: guide/references/configuration/cli/trivy_db_delta_create.md
+                      - DB Export: guide/references/configuration/cli/trivy_db_export.md
+                      - DB Import: guide/references/configuration/cli/trivy_db_import.md
+                      - DB Import Archive: guide/references/configuration/cli/trivy_db_import-archive.md
+                      - DB List: guide/references/configuration/cli/trivy_db_list.md
+                      - DB Remove: guide/references/configuration/cli/trivy_db_remove.md
+                      - DB Rollback: guide/references/configuration/cli/trivy_db_rollback.md
                   - Convert: guide/references/configuration/cli/trivy_convert.md
                   - Filesystem: guide/references/configuration/cli/trivy_filesystem.md
                   - Image: guide/references/configuration/cli/trivy_image.md

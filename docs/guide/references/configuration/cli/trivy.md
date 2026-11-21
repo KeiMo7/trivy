@@ -47,6 +47,7 @@ trivy [global flags] command [flags] target
 * [trivy clean](trivy_clean.md)	 - Remove cached files
 * [trivy config](trivy_config.md)	 - Scan config files for misconfigurations
 * [trivy convert](trivy_convert.md)	 - Convert Trivy JSON report into a different format
+* [trivy db](trivy_db.md)	 - Manage the local vulnerability database versions
 * [trivy filesystem](trivy_filesystem.md)	 - Scan local filesystem
 * [trivy image](trivy_image.md)	 - Scan a container image
 * [trivy kubernetes](trivy_kubernetes.md)	 - [EXPERIMENTAL] Scan kubernetes cluster

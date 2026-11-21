@@ -14,6 +14,17 @@ import (
 type TrivyInfo struct {
 	Version string      `json:",omitempty"` // Client version
 	Server  VersionInfo `json:",omitzero"`  // Server info (client/server mode only)
+
+	// VulnerabilityDB identifies the vulnerability database version used for
+	// this scan. It is empty when vulnerability scanning was disabled.
+	VulnerabilityDB *VulnerabilityDBInfo `json:",omitempty"`
+}
+
+// VulnerabilityDBInfo identifies the vulnerability database version used for a
+// scan. The version identifier is stable for a given database content and is
+// what `--db-version` accepts.
+type VulnerabilityDBInfo struct {
+	Version string `json:",omitempty"`
 }
 
 // Report represents a scan result

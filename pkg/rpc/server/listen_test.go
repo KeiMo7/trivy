@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path"
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -90,7 +91,7 @@ func Test_dbWorker_update(t *testing.T) {
 			w := newDBWorker(client)
 
 			var dbUpdateWg, requestWg sync.WaitGroup
-			err := w.update(ctx, "1.2.3", dbDir,
+			err := w.update(ctx, "1.2.3", filepath.Dir(dbDir), dbDir,
 				tt.skipUpdate, &dbUpdateWg, &requestWg, ftypes.RegistryOptions{})
 			if tt.wantErr != "" {
 				require.ErrorContains(t, err, tt.wantErr, tt.name)

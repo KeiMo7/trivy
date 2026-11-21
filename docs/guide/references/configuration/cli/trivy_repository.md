@@ -32,7 +32,10 @@ trivy repository [flags] (REPO_PATH | REPO_URL)
       --config-data strings               specify paths from which data for the Rego checks will be recursively loaded
       --config-file-schemas strings       specify paths to JSON configuration file schemas to determine that a file matches some configuration and pass the schema to Rego checks for type checking
       --custom-headers strings            custom headers in client mode
+      --db-max-size string                maximum total size of retained vulnerability database versions (e.g. 2GB); oldest versions are evicted first
       --db-repository strings             OCI repository(ies) to retrieve trivy-db in order of priority (default [mirror.gcr.io/aquasec/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2])
+      --db-retention int                  number of vulnerability database versions to keep for rollback (default 2)
+      --db-version string                 use a specific locally retained vulnerability database version instead of the active one
       --dependency-tree                   [EXPERIMENTAL] show dependency origin tree of vulnerable packages
       --detection-priority string         specify the detection priority:
                                             - "precise": Prioritizes precise by minimizing false positives.

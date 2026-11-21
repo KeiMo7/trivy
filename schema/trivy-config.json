@@ -152,6 +152,18 @@
             "type": "string"
           },
           "description": "OCI repository(ies) to retrieve trivy-java-db in order of priority"
+        },
+        "version": {
+          "type": "string",
+          "description": "use a specific locally retained vulnerability database version instead of the active one"
+        },
+        "retention": {
+          "type": "integer",
+          "description": "number of vulnerability database versions to keep for rollback"
+        },
+        "max-size": {
+          "type": "string",
+          "description": "maximum total size of retained vulnerability database versions (e.g. 2GB); oldest versions are evicted first"
         }
       }
     },

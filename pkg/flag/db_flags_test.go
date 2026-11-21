@@ -40,6 +40,7 @@ func TestDBFlagGroup_ToOptions(t *testing.T) {
 				DownloadDBOnly:     false,
 				DBRepositories:     []name.Reference{name.Tag{}}, // All fields are unexported
 				JavaDBRepositories: []name.Reference{name.Tag{}}, // All fields are unexported
+				DBRetention:        2,
 			},
 			wantLogs: []string{
 				`Adding schema version to the DB repository for backward compatibility	repository="ghcr.io/aquasecurity/trivy-db:2"`,
@@ -82,6 +83,7 @@ func TestDBFlagGroup_ToOptions(t *testing.T) {
 				DownloadDBOnly:     false,
 				DBRepositories:     []name.Reference{name.Tag{}, name.Tag{}}, // All fields are unexported
 				JavaDBRepositories: []name.Reference{name.Tag{}, name.Tag{}}, // All fields are unexported
+				DBRetention:        2,
 			},
 		},
 	}

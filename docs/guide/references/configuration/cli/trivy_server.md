@@ -22,7 +22,10 @@ trivy server [flags]
 ```
       --cache-backend string     [EXPERIMENTAL] cache backend (e.g. redis://localhost:6379) (default "fs")
       --cache-ttl duration       cache TTL when using Redis as cache backend
+      --db-max-size string       maximum total size of retained vulnerability database versions (e.g. 2GB); oldest versions are evicted first
       --db-repository strings    OCI repository(ies) to retrieve trivy-db in order of priority (default [mirror.gcr.io/aquasec/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2])
+      --db-retention int         number of vulnerability database versions to keep for rollback (default 2)
+      --db-version string        use a specific locally retained vulnerability database version instead of the active one
       --download-db-only         download/update vulnerability database but don't run a scan
       --enable-modules strings   [EXPERIMENTAL] module names to enable
   -h, --help                     help for server

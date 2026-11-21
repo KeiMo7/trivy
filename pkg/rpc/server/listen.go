@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -15,14 +16,12 @@ import (
 	"github.com/twitchtv/twirp"
 	"golang.org/x/xerrors"
 
-	"github.com/aquasecurity/trivy-db/pkg/metadata"
 	"github.com/aquasecurity/trivy/pkg/cache"
 	"github.com/aquasecurity/trivy/pkg/db"
+	storepkg "github.com/aquasecurity/trivy/pkg/db/store"
 	"github.com/aquasecurity/trivy/pkg/fanal/types"
 	"github.com/aquasecurity/trivy/pkg/log"
-	"github.com/aquasecurity/trivy/pkg/utils/fsutils"
 	"github.com/aquasecurity/trivy/pkg/version"
-	xos "github.com/aquasecurity/trivy/pkg/x/os"
 	rpcCache "github.com/aquasecurity/trivy/rpc/cache"
 	rpcScanner "github.com/aquasecurity/trivy/rpc/scanner"
 )
@@ -89,7 +88,7 @@ func (s Server) ListenAndServe(ctx context.Context, serverCache cache.Cache, ski
 				cancel()
 				return
 			case <-ticker.C:
-				if err := worker.update(ctx, s.appVersion, s.dbDir, skipDBUpdate, dbUpdateWg, requestWg, s.RegistryOptions); err != nil {
+				if err := worker.update(ctx, s.appVersion, s.cacheDir, s.dbDir, skipDBUpdate, dbUpdateWg, requestWg, s.RegistryOptions); err != nil {
 					log.Errorf("%+v\n", err)
 				}
 			}
@@ -172,7 +171,7 @@ func newDBWorker(dbClient *db.Client) dbWorker {
 	return dbWorker{dbClient: dbClient}
 }
 
-func (w dbWorker) update(ctx context.Context, appVersion, dbDir string,
+func (w dbWorker) update(ctx context.Context, appVersion, cacheDir, dbDir string,
 	skipDBUpdate bool, dbUpdateWg, requestWg *sync.WaitGroup, opt types.RegistryOptions) error {
 	log.Debug("Check for DB update...")
 	needsUpdate, err := w.dbClient.NeedsUpdate(ctx, appVersion, skipDBUpdate)
@@ -183,21 +182,35 @@ func (w dbWorker) update(ctx context.Context, appVersion, dbDir string,
 	}
 
 	log.Info("Updating DB...")
-	if err = w.hotUpdate(ctx, dbDir, dbUpdateWg, requestWg, opt); err != nil {
+	if err = w.hotUpdate(ctx, cacheDir, dbDir, dbUpdateWg, requestWg, opt); err != nil {
 		return xerrors.Errorf("failed DB hot update: %w", err)
 	}
 	return nil
 }
 
-func (w dbWorker) hotUpdate(ctx context.Context, dbDir string, dbUpdateWg, requestWg *sync.WaitGroup, opt types.RegistryOptions) error {
-	tmpDir, err := xos.MkdirTemp("", "db-worker-")
+func (w dbWorker) hotUpdate(ctx context.Context, cacheDir, dbDir string, dbUpdateWg, requestWg *sync.WaitGroup, opt types.RegistryOptions) error {
+	dbStore, err := db.OpenStore(cacheDir, db.DefaultStoreOptions())
 	if err != nil {
-		return xerrors.Errorf("failed to create a temp dir: %w", err)
+		return xerrors.Errorf("failed to open database store: %w", err)
 	}
-	defer os.RemoveAll(tmpDir)
+
+	// Download into the store's staging area so that installing the new
+	// version is a rename on the same filesystem, not a second copy.
+	tmpDir, err := dbStore.StagingDir("db-worker")
+	if err != nil {
+		return xerrors.Errorf("failed to create a staging dir: %w", err)
+	}
+	defer os.RemoveAll(tmpDir) //nolint: errcheck
 
 	if err = w.dbClient.Download(ctx, tmpDir, opt); err != nil {
 		return xerrors.Errorf("failed to download vulnerability DB: %w", err)
+	}
+
+	// Install and verify the new database before suspending any requests.
+	// Until activation succeeds, in-flight scans keep reading the old version.
+	m, err := dbStore.InstallFromStaging(ctx, tmpDir, storepkg.InstallOptions{Origin: "download"})
+	if err != nil {
+		return xerrors.Errorf("failed to install vulnerability DB: %w", err)
 	}
 
 	log.Info("Suspending all requests during DB update")
@@ -211,18 +224,21 @@ func (w dbWorker) hotUpdate(ctx context.Context, dbDir string, dbUpdateWg, reque
 		return xerrors.Errorf("failed to close DB: %w", err)
 	}
 
-	// Copy trivy.db
-	if _, err = fsutils.CopyFile(db.Path(tmpDir), db.Path(dbDir)); err != nil {
-		return xerrors.Errorf("failed to copy the database file: %w", err)
+	// Swap the version atomically and reopen it. A failure here leaves the
+	// previous version active and in place.
+	if err = dbStore.Activate(ctx, m.Version); err != nil {
+		return xerrors.Errorf("failed to activate the new database version: %w", err)
+	}
+	current, err := dbStore.Current()
+	if err != nil {
+		return xerrors.Errorf("failed to read the active database version: %w", err)
+	}
+	if err = db.MirrorMetadata(filepath.Join(dbDir, "versions", current.Version), dbDir); err != nil {
+		return err
 	}
 
-	// Copy metadata.json
-	if _, err = fsutils.CopyFile(metadata.Path(tmpDir), metadata.Path(dbDir)); err != nil {
-		return xerrors.Errorf("failed to copy the metadata file: %w", err)
-	}
-
-	log.Info("Reopening DB...")
-	if err = db.Init(dbDir); err != nil {
+	log.Info("Reopening DB...", log.String("version", current.Version))
+	if err = db.Init(filepath.Join(dbDir, "versions", current.Version)); err != nil {
 		return xerrors.Errorf("failed to open DB: %w", err)
 	}
 

@@ -170,6 +170,9 @@ func (r *summaryRenderer) Render(report types.Report) {
 	}
 
 	r.printf("\n<underline><bold>Report Summary</bold></underline>\n\n")
+	if report.Trivy.VulnerabilityDB != nil && report.Trivy.VulnerabilityDB.Version != "" {
+		r.printf("Vulnerability database version: %s\n\n", report.Trivy.VulnerabilityDB.Version)
+	}
 
 	t := newTableWriter(r.w, r.isTerminal)
 	t.SetAutoMerge(false)

@@ -101,6 +101,8 @@ type runner struct {
 	initializeScanService InitializeScanService
 	versionChecker        *notification.VersionChecker
 	dbOpen                bool
+	dbRelease             func()
+	dbVersion             string
 
 	// WASM modules
 	module *module.Manager
@@ -179,6 +181,10 @@ func (r *runner) Close(ctx context.Context) error {
 	if r.dbOpen {
 		if err := db.Close(); err != nil {
 			errs = multierror.Append(errs, err)
+		}
+		if r.dbRelease != nil {
+			r.dbRelease()
+			r.dbRelease = nil
 		}
 	}
 
@@ -304,6 +310,14 @@ func (r *runner) scanArtifact(ctx context.Context, opts flag.Options, initialize
 		return types.Report{}, xerrors.Errorf("scan error: %w", err)
 	}
 
+	// Record which database version produced this report so that compliance
+	// reviews can reproduce the scan.
+	if r.dbVersion != "" {
+		report.Trivy.VulnerabilityDB = &types.VulnerabilityDBInfo{
+			Version: r.dbVersion,
+		}
+	}
+
 	return report, nil
 }
 
@@ -332,9 +346,20 @@ func (r *runner) initDB(ctx context.Context, opts flag.Options) error {
 		return nil
 	}
 
-	// download the database file
+	// Download or verify the database version.
 	noProgress := opts.Quiet || opts.NoProgress
-	if err := operation.DownloadDB(ctx, opts.AppVersion, opts.CacheDir, opts.DBRepositories, noProgress, opts.SkipDBUpdate, opts.RegistryOpts()); err != nil {
+	if err := operation.DownloadDBWithOptions(ctx, operation.DBOptions{
+		CacheDir:     opts.CacheDir,
+		AppVersion:   opts.AppVersion,
+		Repositories: opts.DBRepositories,
+		Registry:     opts.RegistryOpts(),
+		Quiet:        noProgress,
+		SkipUpdate:   opts.SkipDBUpdate,
+		Store: db.StoreOptions{
+			Retention: opts.DBRetention,
+			MaxSize:   opts.DBMaxSize,
+		},
+	}); err != nil {
 		return err
 	}
 
@@ -342,10 +367,28 @@ func (r *runner) initDB(ctx context.Context, opts flag.Options) error {
 		return SkipScan
 	}
 
-	if err := db.Init(db.Dir(opts.CacheDir)); err != nil {
+	// Open the verified version chosen for this scan. Pinning a version does
+	// not modify the active one, so concurrent scans can use different
+	// versions.
+	storeOpts := db.StoreOptions{Retention: opts.DBRetention, MaxSize: opts.DBMaxSize}
+	dbDir, release, err := db.ResolveWithOptions(ctx, opts.CacheDir, opts.DBVersion, storeOpts)
+	if err != nil {
+		return xerrors.Errorf("error in vulnerability DB initialization: %w", err)
+	}
+
+	if err = db.Init(dbDir); err != nil {
+		release()
 		return xerrors.Errorf("error in vulnerability DB initialization: %w", err)
 	}
 	r.dbOpen = true
+	r.dbRelease = release
+	if m, ok := db.ActiveManifestWithOptions(opts.CacheDir, storeOpts); ok {
+		r.dbVersion = m.Version
+	}
+	if opts.DBVersion != "" {
+		r.dbVersion = opts.DBVersion
+	}
+	log.InfoContext(ctx, "Using vulnerability database version", log.String("version", r.dbVersion))
 
 	return nil
 }
