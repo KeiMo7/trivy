@@ -137,3 +137,67 @@ func GuessBaseImageIndex(histories []v1.History) int {
 	}
 	return baseImageIndex
 }
+
+// BaseDiffIDs returns the uncompressed layer IDs that belong to the base image.
+//
+// The boundary is guessed from the image history (see GuessBaseImageIndex) and
+// mapped onto the diff IDs, which do not contain empty layers. The result is
+// recorded while the image is analyzed so that later stages do not have to
+// infer layer provenance from file paths. It returns nil when the boundary
+// cannot be determined.
+func BaseDiffIDs(diffIDs []string, histories []v1.History) []string {
+	baseImageIndex := GuessBaseImageIndex(histories)
+
+	// Diff IDs don't include empty layers, so the index is different from histories
+	var diffIDIndex int
+	var baseDiffIDs []string
+	for i, h := range histories {
+		// It is no longer base layer.
+		if i > baseImageIndex {
+			break
+		}
+		// Empty layers are not included in diff IDs.
+		if h.EmptyLayer {
+			continue
+		}
+
+		if diffIDIndex >= len(diffIDs) {
+			// something wrong...
+			return nil
+		}
+		baseDiffIDs = append(baseDiffIDs, diffIDs[diffIDIndex])
+		diffIDIndex++
+	}
+	return baseDiffIDs
+}
+
+// ClassifyLayerRoles classifies image layers into base, middle and application
+// roles. diffIDs are ordered from the bottom to the top of the image, matching
+// the order of the layers in the report.
+//
+// Layers up to and including the detected base image boundary are base layers.
+// The top-most layer is the application layer, and the layers in between are
+// middle layers. When the boundary cannot be detected only the top-most layer
+// is classified, as no layer can be safely attributed to the base image.
+func ClassifyLayerRoles(diffIDs []string, histories []v1.History) []types.LayerRole {
+	if len(diffIDs) == 0 {
+		return nil
+	}
+	return classifyLayerRoles(diffIDs, BaseDiffIDs(diffIDs, histories))
+}
+
+func classifyLayerRoles(diffIDs, baseDiffIDs []string) []types.LayerRole {
+	roles := make([]types.LayerRole, len(diffIDs))
+	for i := range diffIDs {
+		switch {
+		case i < len(baseDiffIDs):
+			// The detected base layers are always a prefix of the image.
+			roles[i] = types.LayerRoleBase
+		case i == len(diffIDs)-1:
+			roles[i] = types.LayerRoleApplication
+		default:
+			roles[i] = types.LayerRoleMiddle
+		}
+	}
+	return roles
+}

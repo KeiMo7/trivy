@@ -539,6 +539,7 @@ func (o *Options) ScanOpts() types.ScanOptions {
 		IncludeDevDeps:      o.IncludeDevDeps,
 		Distro:              o.Distro,
 		VulnSeveritySources: o.VulnSeveritySources,
+		LayerProvenance:     o.Format == types.FormatLayerProvenance,
 	}
 }
 
@@ -602,6 +603,13 @@ func (o *Options) ClientScannerOpts() client.ServiceOption {
 // SetOutputWriter sets an output writer.
 func (o *Options) SetOutputWriter(w io.Writer) {
 	o.outputWriter = w
+}
+
+// HasOutputWriter reports whether an output writer was set explicitly, e.g. by
+// a library caller or a test. Such callers own their writer and Trivy must not
+// replace it.
+func (o *Options) HasOutputWriter() bool {
+	return o.outputWriter != nil
 }
 
 // OutputWriter returns an output writer.

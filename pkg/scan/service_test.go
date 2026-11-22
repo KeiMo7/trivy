@@ -464,3 +464,82 @@ func TestService_generateArtifactID(t *testing.T) {
 		})
 	}
 }
+
+// TestScanner_ScanArtifact_LayerProvenance verifies that when layer provenance
+// is requested, the report carries a role for every layer and each vulnerability
+// is attributed to a layer present in the image.
+func TestScanner_ScanArtifact_LayerProvenance(t *testing.T) {
+	uuid.SetFakeUUIDV7(t, "017b7d41-e09f-7000-80ea-%012d")
+
+	_ = dbtest.InitDB(t, []string{"local/testdata/fixtures/happy.yaml"})
+	defer db.Close()
+
+	img, err := image.NewArchiveImage("../fanal/test/testdata/alpine-311.tar.gz")
+	require.NoError(t, err)
+
+	c := cache.NewMemoryCache()
+	artifact, err := image2.NewArtifact(img, c, artifact.Option{})
+	require.NoError(t, err)
+
+	applier := applier.NewApplier(c)
+	scanner := local.NewService(applier, ospkg.NewScanner(), langpkg.NewScanner(), vulnerability.NewClient(db.Config{}))
+	s := scan.NewService(scanner, artifact)
+
+	ctx := clock.With(t.Context(), time.Date(2021, 8, 25, 12, 20, 30, 5, time.UTC))
+	got, err := s.ScanArtifact(ctx, tTypes.ScanOptions{
+		PkgTypes:         []string{"os"},
+		Scanners:         tTypes.Scanners{tTypes.VulnerabilityScanner},
+		PkgRelationships: ftypes.Relationships,
+		LayerProvenance:  true,
+	})
+	require.NoError(t, err)
+
+	require.NotNil(t, got.LayerProvenance)
+	require.Len(t, got.LayerProvenance.Roles, len(got.Metadata.Layers))
+	for _, role := range got.LayerProvenance.Roles {
+		assert.NotEqual(t, ftypes.LayerRoleUnknown, role)
+	}
+
+	diffIDs := make(map[string]bool, len(got.Metadata.Layers))
+	for _, l := range got.Metadata.Layers {
+		diffIDs[l.DiffID] = true
+	}
+
+	var vulns int
+	for _, result := range got.Results {
+		for _, v := range result.Vulnerabilities {
+			vulns++
+			assert.True(t, diffIDs[v.Layer.DiffID], "vulnerability layer %q is not part of the image", v.Layer.DiffID)
+		}
+	}
+	require.NotZero(t, vulns, "expected at least one vulnerability for the provenance assertion")
+}
+
+// TestScanner_ScanArtifact_NoLayerProvenanceByDefault verifies that the
+// provenance metadata is not attached unless it is requested.
+func TestScanner_ScanArtifact_NoLayerProvenanceByDefault(t *testing.T) {
+	uuid.SetFakeUUIDV7(t, "017b7d41-e09f-7000-80ea-%012d")
+
+	_ = dbtest.InitDB(t, []string{"local/testdata/fixtures/happy.yaml"})
+	defer db.Close()
+
+	img, err := image.NewArchiveImage("../fanal/test/testdata/alpine-311.tar.gz")
+	require.NoError(t, err)
+
+	c := cache.NewMemoryCache()
+	artifact, err := image2.NewArtifact(img, c, artifact.Option{})
+	require.NoError(t, err)
+
+	applier := applier.NewApplier(c)
+	scanner := local.NewService(applier, ospkg.NewScanner(), langpkg.NewScanner(), vulnerability.NewClient(db.Config{}))
+	s := scan.NewService(scanner, artifact)
+
+	ctx := clock.With(t.Context(), time.Date(2021, 8, 25, 12, 20, 30, 5, time.UTC))
+	got, err := s.ScanArtifact(ctx, tTypes.ScanOptions{
+		PkgTypes:         []string{"os"},
+		Scanners:         tTypes.Scanners{tTypes.VulnerabilityScanner},
+		PkgRelationships: ftypes.Relationships,
+	})
+	require.NoError(t, err)
+	assert.Nil(t, got.LayerProvenance)
+}

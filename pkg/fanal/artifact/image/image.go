@@ -614,28 +614,5 @@ func (a Artifact) guessBaseLayers(diffIDs []string, configFile *v1.ConfigFile) [
 	if configFile == nil {
 		return nil
 	}
-
-	baseImageIndex := image.GuessBaseImageIndex(configFile.History)
-
-	// Diff IDs don't include empty layers, so the index is different from histories
-	var diffIDIndex int
-	var baseDiffIDs []string
-	for i, h := range configFile.History {
-		// It is no longer base layer.
-		if i > baseImageIndex {
-			break
-		}
-		// Empty layers are not included in diff IDs.
-		if h.EmptyLayer {
-			continue
-		}
-
-		if diffIDIndex >= len(diffIDs) {
-			// something wrong...
-			return nil
-		}
-		baseDiffIDs = append(baseDiffIDs, diffIDs[diffIDIndex])
-		diffIDIndex++
-	}
-	return baseDiffIDs
+	return image.BaseDiffIDs(diffIDs, configFile.History)
 }

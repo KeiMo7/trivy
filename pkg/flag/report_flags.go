@@ -126,6 +126,12 @@ var (
 		Values:     xstrings.ToStringSlice(types.SupportedTableModes),
 		Usage:      "[EXPERIMENTAL] tables that will be displayed in 'table' format",
 	}
+	PreviousReportFlag = Flag[string]{
+		Name:       "previous-report",
+		ConfigName: "previous-report",
+		Usage: "path to a previous '--format layer-provenance' report; " +
+			"findings are then reported as added, removed or unchanged",
+	}
 )
 
 // ReportFlagGroup composes common printer flag structs
@@ -146,6 +152,7 @@ type ReportFlagGroup struct {
 	Compliance      *Flag[string]
 	ShowSuppressed  *Flag[bool]
 	TableMode       *Flag[[]string]
+	PreviousReport  *Flag[string]
 }
 
 type ReportOptions struct {
@@ -164,6 +171,7 @@ type ReportOptions struct {
 	Compliance       spec.ComplianceSpec
 	ShowSuppressed   bool
 	TableModes       []types.TableMode
+	PreviousReport   string
 }
 
 func NewReportFlagGroup() *ReportFlagGroup {
@@ -183,6 +191,7 @@ func NewReportFlagGroup() *ReportFlagGroup {
 		Compliance:      ComplianceFlag.Clone(),
 		ShowSuppressed:  ShowSuppressedFlag.Clone(),
 		TableMode:       TableModeFlag.Clone(),
+		PreviousReport:  PreviousReportFlag.Clone(),
 	}
 }
 
@@ -207,6 +216,7 @@ func (f *ReportFlagGroup) Flags() []Flagger {
 		f.Compliance,
 		f.ShowSuppressed,
 		f.TableMode,
+		f.PreviousReport,
 	}
 }
 
@@ -257,6 +267,11 @@ func (f *ReportFlagGroup) ToOptions(opts *Options) error {
 		return xerrors.New(`"--table-mode" can be used only with "--format table".`)
 	}
 
+	// "--previous-report" only affects the layer-provenance format.
+	if previousReport := f.PreviousReport.Value(); previousReport != "" && format != types.FormatLayerProvenance {
+		return xerrors.Errorf(`"--previous-report" can be used only with "--format %s"`, types.FormatLayerProvenance)
+	}
+
 	cs, err := loadComplianceTypes(f.Compliance.Value())
 	if err != nil {
 		return xerrors.Errorf("unable to load compliance spec: %w", err)
@@ -290,6 +305,7 @@ func (f *ReportFlagGroup) ToOptions(opts *Options) error {
 		Compliance:       cs,
 		ShowSuppressed:   f.ShowSuppressed.Value(),
 		TableModes:       xstrings.ToTSlice[types.TableMode](tableModes),
+		PreviousReport:   f.PreviousReport.Value(),
 	}
 	return nil
 }

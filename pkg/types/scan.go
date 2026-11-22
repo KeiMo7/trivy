@@ -125,6 +125,11 @@ type ScanOptions struct {
 	IncludeDevDeps      bool
 	Distro              types.OS // Forced OS
 	VulnSeveritySources []dbTypes.SourceID
+
+	// LayerProvenance requests that layer attribution be attached to the
+	// report. It is enabled only by the layer-provenance report format so that
+	// other formats are unaffected.
+	LayerProvenance bool
 }
 
 // ScanResponse represents the response from the scan service

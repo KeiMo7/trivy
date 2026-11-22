@@ -16,6 +16,12 @@ type Applier interface {
 	ApplyLayers(ctx context.Context, artifactID string, blobIDs []string) (detail ftypes.ArtifactDetail, err error)
 }
 
+// ProvenanceApplier is implemented by appliers that can additionally record
+// the effective origin layer of each package while merging layers.
+type ProvenanceApplier interface {
+	ApplyLayersWithProvenance(ctx context.Context, artifactID string, blobIDs []string) (detail ftypes.ArtifactDetail, err error)
+}
+
 type applier struct {
 	cache cache.LocalArtifactCache
 }
@@ -25,6 +31,14 @@ func NewApplier(c cache.LocalArtifactCache) Applier {
 }
 
 func (a *applier) ApplyLayers(ctx context.Context, imageID string, layerKeys []string) (ftypes.ArtifactDetail, error) {
+	return a.applyLayers(ctx, imageID, layerKeys, false)
+}
+
+func (a *applier) ApplyLayersWithProvenance(ctx context.Context, imageID string, layerKeys []string) (ftypes.ArtifactDetail, error) {
+	return a.applyLayers(ctx, imageID, layerKeys, true)
+}
+
+func (a *applier) applyLayers(ctx context.Context, imageID string, layerKeys []string, provenance bool) (ftypes.ArtifactDetail, error) {
 	var layers []ftypes.BlobInfo
 	var layerInfoList ftypes.Layers
 	for _, key := range layerKeys {
@@ -38,7 +52,12 @@ func (a *applier) ApplyLayers(ctx context.Context, imageID string, layerKeys []s
 		layers = append(layers, blob)
 	}
 
-	mergedLayer := ApplyLayers(layers)
+	var mergedLayer ftypes.ArtifactDetail
+	if provenance {
+		mergedLayer = ApplyLayersWithProvenance(layers)
+	} else {
+		mergedLayer = ApplyLayers(layers)
+	}
 
 	imageInfo, _ := a.cache.GetArtifact(ctx, imageID) // nolint
 	mergedLayer.ImageConfig = ftypes.ImageConfigDetail{

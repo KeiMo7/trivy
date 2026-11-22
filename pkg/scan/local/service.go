@@ -58,7 +58,7 @@ func NewService(a applier.Applier, osPkgScanner ospkg.Scanner, langPkgScanner la
 // Scan scans the artifact and return results.
 func (s Service) Scan(ctx context.Context, targetName, artifactKey string, blobKeys []string, options types.ScanOptions) (
 	types.ScanResponse, error) {
-	detail, err := s.applier.ApplyLayers(ctx, artifactKey, blobKeys)
+	detail, err := s.applyLayers(ctx, artifactKey, blobKeys, options.LayerProvenance)
 	switch {
 	case errors.Is(err, analyzer.ErrUnknownOS):
 		log.Debug("OS is not detected.")
@@ -130,11 +130,27 @@ func (s Service) Scan(ctx context.Context, targetName, artifactKey string, blobK
 	if err != nil {
 		return types.ScanResponse{}, err
 	}
+
+	if options.LayerProvenance {
+		results = applyOriginProvenance(results, detail.Provenance)
+	}
+
 	return types.ScanResponse{
 		Results: results,
 		OS:      os,
 		Layers:  detail.Layers,
 	}, nil
+}
+
+// applyLayers merges the layers. When provenance is requested and the applier
+// supports it, the effective origin layer of each package is recorded too.
+func (s Service) applyLayers(ctx context.Context, artifactKey string, blobKeys []string, provenance bool) (ftypes.ArtifactDetail, error) {
+	if provenance {
+		if pa, ok := s.applier.(applier.ProvenanceApplier); ok {
+			return pa.ApplyLayersWithProvenance(ctx, artifactKey, blobKeys)
+		}
+	}
+	return s.applier.ApplyLayers(ctx, artifactKey, blobKeys)
 }
 
 func (s Service) ScanTarget(ctx context.Context, target types.ScanTarget, options types.ScanOptions) (types.Results, ftypes.OS, error) {
@@ -601,4 +617,59 @@ func mergeSecrets(targetName string, detail ftypes.ArtifactDetail) []ftypes.Secr
 	secret := detail.ImageConfig.Secret
 	secret.FilePath = targetName // Set the target name to the file path as container image config is not a real file.
 	return append(detail.Secrets, *secret)
+}
+
+// applyOriginProvenance replaces each vulnerability's layer with the origin
+// layer recorded while the layers were merged.
+//
+// The detector copies a package's layer onto its vulnerabilities. That layer
+// comes from a path-based lookup, which can pick a lower layer whose entry was
+// later overwritten when the same file path exists in several layers. The
+// origin recorded during the merge is the layer that actually provided the
+// effective file, so it is used instead when provenance is requested.
+//
+// The results themselves are not re-ordered or otherwise modified, so the
+// layer-provenance format remains deterministic and the other formats are
+// unaffected.
+func applyOriginProvenance(results types.Results, provenance []ftypes.PackageProvenance) types.Results {
+	if len(provenance) == 0 {
+		return results
+	}
+
+	osPkg := make(map[string]ftypes.Layer, len(provenance))
+	libPkg := make(map[string]ftypes.Layer, len(provenance))
+	for _, p := range provenance {
+		key := provenancePkgKey(p.PkgID, p.Name, p.Version, p.PkgPath)
+		if p.Kind == provenanceKindOS {
+			osPkg[key] = p.Layer
+		} else {
+			libPkg[key] = p.Layer
+		}
+	}
+
+	for i := range results {
+		for j := range results[i].Vulnerabilities {
+			v := &results[i].Vulnerabilities[j]
+			key := provenancePkgKey(v.PkgID, v.PkgName, v.InstalledVersion, v.PkgPath)
+			var layer ftypes.Layer
+			var ok bool
+			if results[i].Class == types.ClassOSPkg {
+				layer, ok = osPkg[key]
+			} else {
+				layer, ok = libPkg[key]
+			}
+			if ok {
+				v.Layer = layer
+			}
+		}
+	}
+	return results
+}
+
+// provenanceKindOS marks OS package provenance, matching all other kinds
+// being language types.
+const provenanceKindOS = "os"
+
+func provenancePkgKey(pkgID, name, version, pkgPath string) string {
+	return strings.Join([]string{pkgID, name, version, pkgPath}, "\x00")
 }

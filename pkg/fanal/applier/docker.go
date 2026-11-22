@@ -110,18 +110,42 @@ func lookupOriginLayerForCustomResource(customResource ftypes.CustomResource, la
 // ApplyLayers returns the merged layer
 // nolint: gocyclo
 func ApplyLayers(layers []ftypes.BlobInfo) ftypes.ArtifactDetail {
+	return applyLayers(layers, false)
+}
+
+// ApplyLayersWithProvenance returns the merged layer and additionally records
+// the origin layer of each package as the layer that provided the effective
+// file, i.e. the last layer that wrote it.
+//
+// The regular origin lookup resolves a package to the first layer that holds a
+// matching entry. That is wrong when the same file path exists in more than
+// one layer: the entry in the lower layer may have been overwritten, and the
+// effective package comes from the upper layer. Provenance recorded here is
+// based on the merge traversal itself, so it does not depend on path lookups.
+//
+// The result is returned on ArtifactDetail.Provenance and is only populated
+// when it is requested, so the default behavior is unchanged.
+func ApplyLayersWithProvenance(layers []ftypes.BlobInfo) ftypes.ArtifactDetail {
+	return applyLayers(layers, true)
+}
+
+// nolint: gocyclo
+func applyLayers(layers []ftypes.BlobInfo, provenance bool) ftypes.ArtifactDetail {
 	sep := "/"
 	nestedMap := nested.Nested{}
 	secretsMap := make(map[string]ftypes.Secret)
+	origin := newOriginRecorder(provenance)
 	var mergedLayer ftypes.ArtifactDetail
 
 	for _, layer := range layers {
 		for _, opqDir := range layer.OpaqueDirs {
 			opqDir = strings.TrimSuffix(opqDir, sep)  // this is necessary so that an empty element is not contribute into the array of the DeleteByString function
 			_ = nestedMap.DeleteByString(opqDir, sep) // nolint
+			origin.deleteByPrefix(opqDir)
 		}
 		for _, whFile := range layer.WhiteoutFiles {
 			_ = nestedMap.DeleteByString(whFile, sep) // nolint
+			origin.deleteByPrefix(whFile)
 		}
 
 		mergedLayer.OS.Merge(layer.OS)
@@ -134,12 +158,14 @@ func ApplyLayers(layers []ftypes.BlobInfo) ftypes.ArtifactDetail {
 		for _, pkgInfo := range layer.PackageInfos {
 			key := fmt.Sprintf("%s/type:ospkg", pkgInfo.FilePath)
 			nestedMap.SetByString(key, sep, pkgInfo)
+			origin.recordPackages(layer, pkgInfo)
 		}
 
 		// Apply language-specific packages
 		for _, app := range layer.Applications {
 			key := fmt.Sprintf("%s/type:%s", app.FilePath, app.Type)
 			nestedMap.SetByString(key, sep, app)
+			origin.recordApplication(layer, app)
 		}
 
 		// Apply misconfigurations
@@ -333,6 +359,10 @@ func ApplyLayers(layers []ftypes.BlobInfo) ftypes.ArtifactDetail {
 
 	// Aggregate python/ruby/node.js packages and JAR files
 	aggregate(&mergedLayer)
+
+	if provenance {
+		mergedLayer.Provenance = origin.result()
+	}
 
 	mergedLayer.Sort()
 

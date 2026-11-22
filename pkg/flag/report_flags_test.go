@@ -34,6 +34,7 @@ func TestReportFlagGroup_ToOptions(t *testing.T) {
 		debug            bool
 		pkgTypes         string
 		tableModes       []string
+		previousReport   string
 	}
 	tests := []struct {
 		name     string
@@ -172,6 +173,25 @@ func TestReportFlagGroup_ToOptions(t *testing.T) {
 			wantErr: `"--table-mode" can be used only with "--format table".`,
 		},
 		{
+			name: "invalid option combination: --previous-report without layer-provenance",
+			fields: fields{
+				format:         "json",
+				previousReport: "prev.jsonl",
+			},
+			wantErr: `"--previous-report" can be used only with "--format layer-provenance"`,
+		},
+		{
+			name: "happy path with layer-provenance and a previous report",
+			fields: fields{
+				format:         "layer-provenance",
+				previousReport: "prev.jsonl",
+			},
+			want: flag.ReportOptions{
+				Format:         types.FormatLayerProvenance,
+				PreviousReport: "prev.jsonl",
+			},
+		},
+		{
 			name: "happy path with template file (.tpl extension)",
 			fields: fields{
 				format:     "template",
@@ -238,6 +258,7 @@ func TestReportFlagGroup_ToOptions(t *testing.T) {
 			setValue(flag.SeverityFlag.ConfigName, tt.fields.severities)
 			setValue(flag.ComplianceFlag.ConfigName, tt.fields.compliance)
 			setSliceValue(flag.TableModeFlag.ConfigName, tt.fields.tableModes)
+			setValue(flag.PreviousReportFlag.ConfigName, tt.fields.previousReport)
 
 			// Assert options
 			f := &flag.ReportFlagGroup{
@@ -254,6 +275,7 @@ func TestReportFlagGroup_ToOptions(t *testing.T) {
 				Severity:        flag.SeverityFlag.Clone(),
 				Compliance:      flag.ComplianceFlag.Clone(),
 				TableMode:       flag.TableModeFlag.Clone(),
+				PreviousReport:  flag.PreviousReportFlag.Clone(),
 			}
 
 			flags := flag.Flags{f}

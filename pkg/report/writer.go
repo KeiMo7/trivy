@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
@@ -16,6 +18,7 @@ import (
 	"github.com/aquasecurity/trivy/pkg/log"
 	"github.com/aquasecurity/trivy/pkg/report/cyclonedx"
 	"github.com/aquasecurity/trivy/pkg/report/github"
+	"github.com/aquasecurity/trivy/pkg/report/layerprovenance"
 	"github.com/aquasecurity/trivy/pkg/report/predicate"
 	"github.com/aquasecurity/trivy/pkg/report/spdx"
 	"github.com/aquasecurity/trivy/pkg/report/table"
@@ -33,6 +36,31 @@ func Write(ctx context.Context, report types.Report, option flag.Options) (err e
 		return xerrors.Errorf("pre report error: %w", err)
 	}
 
+	// Load an input that the writer needs before anything is written, so that
+	// a bad input cannot leave an empty or half-written output file behind.
+	var previous *layerprovenance.Previous
+	if option.Format == types.FormatLayerProvenance {
+		previous, err = layerprovenance.LoadPrevious(option.PreviousReport)
+		if err != nil {
+			return err
+		}
+	}
+
+	// The provenance report writes many records in sequence. When it targets a
+	// file, write to a temporary file and rename it into place so that a
+	// failure mid-write does not leave a half-written report behind.
+	if option.Format == types.FormatLayerProvenance && option.Output != "" &&
+		!option.HasOutputWriter() && !strings.HasPrefix(option.Output, "plugin=") {
+		if err := writeAtomic(ctx, report, option, previous); err != nil {
+			return err
+		}
+		// Call post-report hooks, as on the regular path.
+		if err := extension.PostReport(ctx, &report, option); err != nil {
+			return xerrors.Errorf("post report error: %w", err)
+		}
+		return nil
+	}
+
 	output, cleanup, err := option.OutputWriter(ctx)
 	if err != nil {
 		return xerrors.Errorf("failed to create a file: %w", err)
@@ -48,7 +76,7 @@ func Write(ctx context.Context, report types.Report, option flag.Options) (err e
 		return complianceWrite(ctx, report, option, output)
 	}
 
-	writer, err := initWriter(output, report, option)
+	writer, err := initWriter(output, report, option, previous)
 	if err != nil {
 		return err
 	}
@@ -65,7 +93,42 @@ func Write(ctx context.Context, report types.Report, option flag.Options) (err e
 	return nil
 }
 
-func initWriter(output io.Writer, report types.Report, option flag.Options) (Writer, error) {
+// writeAtomic writes the provenance report to a temporary file next to the
+// target and renames it into place only after the write succeeds.
+func writeAtomic(ctx context.Context, report types.Report, option flag.Options,
+	previous *layerprovenance.Previous) (err error) {
+	path := option.Output
+	dir := filepath.Dir(path)
+	tmp, err := os.CreateTemp(dir, ".layer-provenance-*")
+	if err != nil {
+		return xerrors.Errorf("failed to create a temporary file: %w", err)
+	}
+	tmpPath := tmp.Name()
+	defer func() {
+		if err != nil {
+			_ = tmp.Close()
+			_ = os.Remove(tmpPath)
+		}
+	}()
+
+	writer := layerprovenance.NewWriter(layerprovenance.Options{
+		Output:   tmp,
+		Previous: previous,
+	})
+	if err = writer.Write(ctx, report); err != nil {
+		return xerrors.Errorf("failed to write results: %w", err)
+	}
+	if err = tmp.Close(); err != nil {
+		return xerrors.Errorf("failed to close a temporary file: %w", err)
+	}
+	if err = os.Rename(tmpPath, path); err != nil {
+		return xerrors.Errorf("failed to move the temporary file into place: %w", err)
+	}
+	return nil
+}
+
+func initWriter(output io.Writer, report types.Report, option flag.Options,
+	previous *layerprovenance.Previous) (Writer, error) {
 	switch option.Format {
 	case types.FormatTable:
 		return table.NewWriter(table.Options{
@@ -119,6 +182,11 @@ func initWriter(output io.Writer, report types.Report, option flag.Options) (Wri
 		}, nil
 	case types.FormatCosignVuln:
 		return predicate.NewVulnWriter(output, option.AppVersion), nil
+	case types.FormatLayerProvenance:
+		return layerprovenance.NewWriter(layerprovenance.Options{
+			Output:   output,
+			Previous: previous,
+		}), nil
 	default:
 		return nil, xerrors.Errorf("unknown format: %v", option.Format)
 	}

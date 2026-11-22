@@ -37,6 +37,11 @@ type Report struct {
 
 	// parsed SBOM
 	BOM *core.BOM `json:"-"` // Just for internal usage, not exported in JSON
+
+	// LayerProvenance holds layer roles recorded while the artifact was
+	// analyzed. It is internal metadata and is never written by the existing
+	// report formats.
+	LayerProvenance *LayerProvenance `json:"-"`
 }
 
 // Metadata represents a metadata of artifact
@@ -100,6 +105,11 @@ const (
 	FormatSPDXJSON   Format = "spdx-json"
 	FormatGitHub     Format = "github"
 	FormatCosignVuln Format = "cosign-vuln"
+
+	// FormatLayerProvenance is an opt-in, streaming report that records the
+	// layer origin of each vulnerability and, when a previous provenance
+	// report is supplied, the difference between the two scans.
+	FormatLayerProvenance Format = "layer-provenance"
 )
 
 var BuiltInK8sCompliances = []string{
@@ -122,6 +132,7 @@ var (
 		FormatSPDXJSON,
 		FormatGitHub,
 		FormatCosignVuln,
+		FormatLayerProvenance,
 	}
 	SupportedSBOMFormats = []Format{
 		FormatCycloneDX,

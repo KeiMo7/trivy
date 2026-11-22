@@ -240,6 +240,10 @@ type ArtifactDetail struct {
 	CustomResources []CustomResource `json:",omitempty"`
 
 	Layers Layers `json:",omitzero"`
+
+	// Provenance holds the origin layer of packages observed while the layers
+	// were merged. It is populated only when requested and is not serialized.
+	Provenance []PackageProvenance `json:"-"`
 }
 
 // Sort sorts packages and applications in ArtifactDetail

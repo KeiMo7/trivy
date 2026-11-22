@@ -10,6 +10,7 @@ import (
 
 	"github.com/aquasecurity/trivy/pkg/clock"
 	"github.com/aquasecurity/trivy/pkg/fanal/artifact"
+	"github.com/aquasecurity/trivy/pkg/fanal/image"
 	ftypes "github.com/aquasecurity/trivy/pkg/fanal/types"
 	"github.com/aquasecurity/trivy/pkg/fingerprint"
 	"github.com/aquasecurity/trivy/pkg/log"
@@ -119,6 +120,17 @@ func (s Service) ScanArtifact(ctx context.Context, options types.ScanOptions) (t
 		},
 		Results: scanResponse.Results,
 		BOM:     artifactInfo.BOM,
+	}
+
+	if options.LayerProvenance && artifactInfo.Type == ftypes.TypeContainerImage {
+		// The roles are derived from the image metadata captured while the
+		// image was inspected: its diff IDs and history. Nothing is inferred
+		// from file paths, so a path that exists in several layers cannot
+		// produce a wrong attribution.
+		if roles := image.ClassifyLayerRoles(artifactInfo.ImageMetadata.DiffIDs,
+			artifactInfo.ImageMetadata.ConfigFile.History); len(roles) > 0 {
+			r.LayerProvenance = &types.LayerProvenance{Roles: roles}
+		}
 	}
 
 	// Fill fingerprints for all findings

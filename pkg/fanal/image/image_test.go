@@ -560,3 +560,57 @@ func localImage(t *testing.T) v1.Image {
 	require.NoError(t, err)
 	return img
 }
+
+func TestClassifyLayerRoles(t *testing.T) {
+	histories := []v1.History{
+		{CreatedBy: "/bin/sh -c #(nop) ADD file:abc in / "},
+		{CreatedBy: "/bin/sh -c #(nop)  CMD [\"/bin/sh\"]", EmptyLayer: true},
+		{CreatedBy: "/bin/sh -c apt-get update"},
+		{CreatedBy: "/bin/sh -c #(nop) COPY dir:def in /app"},
+		{CreatedBy: "/bin/sh -c #(nop)  CMD [\"/app\"]", EmptyLayer: true},
+	}
+
+	tests := []struct {
+		name      string
+		diffIDs   []string
+		histories []v1.History
+		want      []types.LayerRole
+	}{
+		{
+			name:      "base, middle and application",
+			diffIDs:   []string{"sha256:base", "sha256:middle", "sha256:app"},
+			histories: histories,
+			want: []types.LayerRole{
+				types.LayerRoleBase,
+				types.LayerRoleMiddle,
+				types.LayerRoleApplication,
+			},
+		},
+		{
+			name:      "single layer is the application",
+			diffIDs:   []string{"sha256:only"},
+			histories: []v1.History{{CreatedBy: "/bin/sh -c #(nop) ADD file:abc in / "}},
+			want:      []types.LayerRole{types.LayerRoleApplication},
+		},
+		{
+			name:      "no boundary detected only classifies the top",
+			diffIDs:   []string{"sha256:a", "sha256:b"},
+			histories: []v1.History{{CreatedBy: "/bin/sh -c echo hi"}},
+			want: []types.LayerRole{
+				types.LayerRoleMiddle,
+				types.LayerRoleApplication,
+			},
+		},
+		{
+			name:    "no layers",
+			diffIDs: nil,
+			want:    nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, ClassifyLayerRoles(tt.diffIDs, tt.histories))
+		})
+	}
+}

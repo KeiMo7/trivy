@@ -52,6 +52,7 @@ nav:
           - SBOM: guide/target/sbom.md
       - Scanner:
           - Vulnerability: guide/scanner/vulnerability.md
+          - Layer Provenance: guide/scanner/layer-provenance.md
           - Misconfiguration:
               - Overview: guide/scanner/misconfiguration/index.md
               - Configuration: guide/scanner/misconfiguration/config/config.md
