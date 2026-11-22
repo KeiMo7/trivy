@@ -1,0 +1,21 @@
+[
+  {
+    "product_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "vulnerability_id": "CVE-2024-9001",
+    "scope": "component",
+    "component_purl": "pkg:maven/com.example/no-such-artifact@1.0.0",
+    "status": "not_affected",
+    "justification": "component_not_present",
+    "reviewer": "mallory",
+    "reviewed_at": "2026-11-13T09:00:00Z"
+  },
+  {
+    "product_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "vulnerability_id": "CVE-2024-9002",
+    "scope": "component",
+    "component_purl": "pkg:deb/debian/another-ghost@0.0.1",
+    "status": "fixed",
+    "reviewer": "mallory",
+    "reviewed_at": "2026-11-13T09:05:00Z"
+  }
+]

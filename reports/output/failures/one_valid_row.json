@@ -1,0 +1,11 @@
+[
+  {
+    "product_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "vulnerability_id": "CVE-2024-0002",
+    "scope": "component",
+    "component_purl": "pkg:deb/debian/bash@5.1-2+deb11u1",
+    "status": "fixed",
+    "reviewer": "alice",
+    "reviewed_at": "2026-11-13T07:00:00Z"
+  }
+]

@@ -1,0 +1,525 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "",
+  "author": "security-review-team",
+  "role": "VEX generation pipeline",
+  "version": 1,
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "CVE-2024-0001"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fpayments-api",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/libssl1.1@1.1.1n-0+deb11u5"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-0002"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fpayments-api",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/bash@5.1-2+deb11u1"
+            }
+          ]
+        }
+      ],
+      "status": "fixed"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-0003"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fpayments-api",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/curl@7.74.0-1.3+deb11u7"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-0004"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fpayments-api",
+          "subcomponents": [
+            {
+              "@id": "pkg:maven/org.springframework/spring-web@5.3.20"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_present"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-0005"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fpayments-api",
+          "subcomponents": [
+            {
+              "@id": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.3"
+            }
+          ]
+        }
+      ],
+      "status": "fixed"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-0006"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fpayments-api",
+          "subcomponents": [
+            {
+              "@id": "pkg:maven/org.apache.logging.log4j/log4j-core@2.17.1"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "component_not_present"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-0007"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fpayments-api",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/openssh-client@8.4p1-5+deb11u2"
+            }
+          ]
+        }
+      ],
+      "status": "fixed"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-0008"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fpayments-api",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/zlib@1.2.11.dfsg-2+deb11u2"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_cannot_be_controlled_by_adversary"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-0009"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fpayments-api",
+          "subcomponents": [
+            {
+              "@id": "pkg:maven/io.netty/netty-handler@4.1.75.Final"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "inline_mitigations_already_exist"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-0010"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fpayments-api",
+          "subcomponents": [
+            {
+              "@id": "pkg:maven/io.netty/netty-codec@4.1.75.Final"
+            }
+          ]
+        }
+      ],
+      "status": "affected"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-1001"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222?arch=arm64\u0026repository_url=registry.example.com%2Fteam%2Forders-worker",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/libssl1.1@1.1.1n-0+deb11u5"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-1002"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222?arch=arm64\u0026repository_url=registry.example.com%2Fteam%2Forders-worker",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/bash@5.1-2+deb11u1"
+            }
+          ]
+        }
+      ],
+      "status": "fixed"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-1003"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222?arch=arm64\u0026repository_url=registry.example.com%2Fteam%2Forders-worker",
+          "subcomponents": [
+            {
+              "@id": "pkg:golang/github.com/open-policy-agent/opa@v0.42.2"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_present"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-1004"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222?arch=arm64\u0026repository_url=registry.example.com%2Fteam%2Forders-worker",
+          "subcomponents": [
+            {
+              "@id": "pkg:golang/golang.org/x/net@v0.5.0"
+            }
+          ]
+        }
+      ],
+      "status": "fixed"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-1005"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222?arch=arm64\u0026repository_url=registry.example.com%2Fteam%2Forders-worker",
+          "subcomponents": [
+            {
+              "@id": "pkg:golang/golang.org/x/crypto@v0.4.0"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-1006"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222?arch=arm64\u0026repository_url=registry.example.com%2Fteam%2Forders-worker",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/curl@7.74.0-1.3+deb11u7"
+            }
+          ]
+        }
+      ],
+      "status": "fixed"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-1007"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222?arch=arm64\u0026repository_url=registry.example.com%2Fteam%2Forders-worker",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/libgcrypt20@1.8.7-6"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "component_not_present"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-1008"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222?arch=arm64\u0026repository_url=registry.example.com%2Fteam%2Forders-worker",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/ca-certificates@20210119"
+            }
+          ]
+        }
+      ],
+      "status": "fixed"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-1009"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222?arch=arm64\u0026repository_url=registry.example.com%2Fteam%2Forders-worker",
+          "subcomponents": [
+            {
+              "@id": "pkg:golang/github.com/go-redis/redis/v8@v8.11.5"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_cannot_be_controlled_by_adversary"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-1011"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222?arch=arm64\u0026repository_url=registry.example.com%2Fteam%2Forders-worker",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/libxml2@2.9.10+dfsg-6.7+deb11u4"
+            }
+          ]
+        }
+      ],
+      "status": "fixed"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-2001"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/web-frontend@sha256:3333333333333333333333333333333333333333333333333333333333333333?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fweb-frontend",
+          "subcomponents": [
+            {
+              "@id": "pkg:npm/axios@0.21.1"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-2002"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/web-frontend@sha256:3333333333333333333333333333333333333333333333333333333333333333?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fweb-frontend",
+          "subcomponents": [
+            {
+              "@id": "pkg:npm/lodash@4.17.20"
+            }
+          ]
+        }
+      ],
+      "status": "fixed"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-2003"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/web-frontend@sha256:3333333333333333333333333333333333333333333333333333333333333333?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fweb-frontend",
+          "subcomponents": [
+            {
+              "@id": "pkg:npm/express@4.17.1"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_present"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-2004"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/web-frontend@sha256:3333333333333333333333333333333333333333333333333333333333333333?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fweb-frontend",
+          "subcomponents": [
+            {
+              "@id": "pkg:npm/debug@2.6.8"
+            }
+          ]
+        }
+      ],
+      "status": "fixed"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-2005"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/web-frontend@sha256:3333333333333333333333333333333333333333333333333333333333333333?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fweb-frontend",
+          "subcomponents": [
+            {
+              "@id": "pkg:npm/minimist@1.2.5"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-2006"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/web-frontend@sha256:3333333333333333333333333333333333333333333333333333333333333333?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fweb-frontend",
+          "subcomponents": [
+            {
+              "@id": "pkg:npm/semver@5.7.1"
+            }
+          ]
+        }
+      ],
+      "status": "fixed"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-2007"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/web-frontend@sha256:3333333333333333333333333333333333333333333333333333333333333333?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fweb-frontend",
+          "subcomponents": [
+            {
+              "@id": "pkg:npm/tar@4.4.13"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "inline_mitigations_already_exist"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-2008"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/web-frontend@sha256:3333333333333333333333333333333333333333333333333333333333333333?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fweb-frontend",
+          "subcomponents": [
+            {
+              "@id": "pkg:npm/ws@5.2.3"
+            }
+          ]
+        }
+      ],
+      "status": "fixed"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-2009"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/web-frontend@sha256:3333333333333333333333333333333333333333333333333333333333333333?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fweb-frontend",
+          "subcomponents": [
+            {
+              "@id": "pkg:npm/glob-parent@3.1.0"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-0011"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fpayments-api"
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-1010"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222?arch=arm64\u0026repository_url=registry.example.com%2Fteam%2Forders-worker"
+        }
+      ],
+      "status": "fixed"
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-2010"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/web-frontend@sha256:3333333333333333333333333333333333333333333333333333333333333333?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fweb-frontend"
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path"
+    }
+  ],
+  "timestamp": "2025-11-24T00:00:00Z"
+}

@@ -1,0 +1,45 @@
+{
+  "blocked": false,
+  "reconciliation": [
+    {
+      "product_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "vulnerability_id": "CVE-2024-0003",
+      "scope": "component",
+      "component_purl": "pkg:deb/debian/curl@7.73.0-1",
+      "reason": "component_not_found",
+      "detail": "component pkg:deb/debian/curl@7.73.0-1 is not present in the scan result of registry.example.com/team/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "source_file": "reviews_version_expired.json",
+      "row": 3
+    },
+    {
+      "product_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "vulnerability_id": "CVE-2024-9001",
+      "scope": "component",
+      "component_purl": "pkg:maven/com.example/no-such-artifact@1.0.0",
+      "reason": "component_not_found",
+      "detail": "component pkg:maven/com.example/no-such-artifact@1.0.0 is not present in the scan result of registry.example.com/team/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "source_file": "reviews_missing_entry.json",
+      "row": 2
+    },
+    {
+      "product_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "vulnerability_id": "CVE-2024-9002",
+      "scope": "component",
+      "component_purl": "pkg:deb/debian/another-ghost@0.0.1",
+      "reason": "component_not_found",
+      "detail": "component pkg:deb/debian/another-ghost@0.0.1 is not present in the scan result of registry.example.com/team/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "source_file": "reviews_missing_entry.json",
+      "row": 3
+    },
+    {
+      "product_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "vulnerability_id": "CVE-2024-1004",
+      "scope": "component",
+      "component_purl": "pkg:golang/golang.org/x/net@v0.4.0",
+      "reason": "version_changed",
+      "detail": "component golang/golang.org/x/net changed from version v0.4.0 to v0.5.0",
+      "source_file": "reviews_version_expired.json",
+      "row": 2
+    }
+  ]
+}

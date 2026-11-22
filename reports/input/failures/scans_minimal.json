@@ -1,0 +1,31 @@
+[
+  {
+    "product": {
+      "artifact_type": "container_image",
+      "name": "registry.example.com/team/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "repo_digests": [
+        "registry.example.com/team/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      ],
+      "architecture": "amd64"
+    },
+    "findings": [
+      {"vulnerability_id": "CVE-2024-0002", "component_purl": "pkg:deb/debian/bash@5.1-2+deb11u1", "component_name": "bash", "installed_version": "5.1-2+deb11u1"},
+      {"vulnerability_id": "CVE-2024-0005", "component_purl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.3", "component_name": "jackson-databind", "installed_version": "2.13.3"},
+      {"vulnerability_id": "CVE-2024-0007", "component_purl": "pkg:deb/debian/openssh-client@8.4p1-5+deb11u2", "component_name": "openssh-client", "installed_version": "8.4p1-5+deb11u2"}
+    ]
+  },
+  {
+    "product": {
+      "artifact_type": "container_image",
+      "name": "registry.example.com/team/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "repo_digests": [
+        "registry.example.com/team/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222"
+      ],
+      "architecture": "arm64"
+    },
+    "findings": [
+      {"vulnerability_id": "CVE-2024-1004", "component_purl": "pkg:golang/golang.org/x/net@v0.5.0", "component_name": "x/net", "installed_version": "v0.5.0"},
+      {"vulnerability_id": "CVE-2024-0003", "component_purl": "pkg:deb/debian/curl@7.74.0-1.3+deb11u7", "component_name": "curl", "installed_version": "7.74.0-1.3+deb11u7"}
+    ]
+  }
+]

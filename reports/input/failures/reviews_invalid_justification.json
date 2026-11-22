@@ -1,0 +1,30 @@
+[
+  {
+    "product_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "vulnerability_id": "CVE-2024-0002",
+    "scope": "component",
+    "component_purl": "pkg:deb/debian/bash@5.1-2+deb11u1",
+    "status": "not_affected",
+    "justification": "trust_me_bro",
+    "reviewer": "mallory",
+    "reviewed_at": "2026-11-13T08:00:00Z"
+  },
+  {
+    "product_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "vulnerability_id": "CVE-2024-0005",
+    "scope": "component",
+    "component_purl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.3",
+    "status": "not_affected",
+    "reviewer": "mallory",
+    "reviewed_at": "2026-11-13T08:05:00Z"
+  },
+  {
+    "product_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "vulnerability_id": "CVE-2024-0007",
+    "scope": "component",
+    "component_purl": "pkg:deb/debian/openssh-client@8.4p1-5+deb11u2",
+    "status": "pending_review",
+    "reviewer": "mallory",
+    "reviewed_at": "2026-11-13T08:10:00Z"
+  }
+]

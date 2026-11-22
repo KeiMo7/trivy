@@ -1,0 +1,26 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "",
+  "author": "security-review-team",
+  "role": "VEX generation pipeline",
+  "version": 1,
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "CVE-2024-0002"
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111?arch=amd64\u0026repository_url=registry.example.com%2Fteam%2Fpayments-api",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/bash@5.1-2+deb11u1"
+            }
+          ]
+        }
+      ],
+      "status": "fixed"
+    }
+  ],
+  "timestamp": "2025-11-24T00:00:00Z"
+}

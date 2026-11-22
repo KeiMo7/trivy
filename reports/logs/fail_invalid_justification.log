@@ -1,0 +1,4 @@
+3 issue(s) block VEX generation:
+  - REVIEW_JUSTIFICATION_INVALID (reviews_invalid_justification.json:2): justification "trust_me_bro" is not valid (component_not_present, vulnerable_code_not_present, vulnerable_code_not_in_execute_path, vulnerable_code_cannot_be_controlled_by_adversary, inline_mitigations_already_exist)
+  - REVIEW_JUSTIFICATION_MISSING (reviews_invalid_justification.json:3): CVE-2024-0005 marked not_affected without a justification
+  - REVIEW_BAD_STATUS (reviews_invalid_justification.json:4): status "pending_review" is not a valid OpenVEX status (not_affected, affected, fixed, under_investigation)

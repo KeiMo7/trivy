@@ -1,0 +1,79 @@
+[
+  {
+    "product": {
+      "artifact_type": "container_image",
+      "name": "registry.example.com/team/payments-api:1.4.0",
+      "repo_digests": [
+        "registry.example.com/team/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      ],
+      "repo_tags": ["registry.example.com/team/payments-api:1.4.0", "registry.example.com/team/payments-api:stable"],
+      "architecture": "amd64"
+    },
+    "findings": [
+      {"vulnerability_id": "CVE-2024-0001", "component_purl": "pkg:deb/debian/libssl1.1@1.1.1n-0+deb11u5", "component_name": "libssl1.1", "installed_version": "1.1.1n-0+deb11u5", "pkg_path": "usr/lib/x86_64-linux-gnu/libssl.so.1.1"},
+      {"vulnerability_id": "CVE-2024-0002", "component_purl": "pkg:deb/debian/bash@5.1-2+deb11u1", "component_name": "bash", "installed_version": "5.1-2+deb11u1"},
+      {"vulnerability_id": "CVE-2024-0003", "component_purl": "pkg:deb/debian/curl@7.74.0-1.3+deb11u7", "component_name": "curl", "installed_version": "7.74.0-1.3+deb11u7"},
+      {"vulnerability_id": "CVE-2024-0004", "component_purl": "pkg:maven/org.springframework/spring-web@5.3.20", "component_name": "org.springframework:spring-web", "installed_version": "5.3.20", "pkg_path": "app/WEB-INF/lib/spring-web-5.3.20.jar"},
+      {"vulnerability_id": "CVE-2024-0004", "component_purl": "pkg:maven/org.springframework/spring-web@5.3.20", "component_name": "org.springframework:spring-web", "installed_version": "5.3.20", "pkg_path": "app/WEB-INF/lib2/spring-web-5.3.20.jar"},
+      {"vulnerability_id": "CVE-2024-0005", "component_purl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.3", "component_name": "com.fasterxml.jackson.core:jackson-databind", "installed_version": "2.13.3"},
+      {"vulnerability_id": "CVE-2024-0006", "component_purl": "pkg:maven/org.apache.logging.log4j/log4j-core@2.17.1", "component_name": "org.apache.logging.log4j:log4j-core", "installed_version": "2.17.1"},
+      {"vulnerability_id": "CVE-2024-0007", "component_purl": "pkg:deb/debian/openssh-client@8.4p1-5+deb11u2", "component_name": "openssh-client", "installed_version": "8.4p1-5+deb11u2"},
+      {"vulnerability_id": "CVE-2024-0008", "component_purl": "pkg:deb/debian/zlib@1.2.11.dfsg-2+deb11u2", "component_name": "zlib", "installed_version": "1.2.11.dfsg-2+deb11u2"},
+      {"vulnerability_id": "CVE-2024-0009", "component_purl": "pkg:maven/io.netty/netty-handler@4.1.75.Final", "component_name": "io.netty:netty-handler", "installed_version": "4.1.75.Final"},
+      {"vulnerability_id": "CVE-2024-0010", "component_purl": "pkg:maven/io.netty/netty-codec@4.1.75.Final", "component_name": "io.netty:netty-codec", "installed_version": "4.1.75.Final"},
+      {"vulnerability_id": "CVE-2024-0011", "component_purl": "pkg:deb/debian/libc-bin@2.31-13+deb11u6", "component_name": "libc-bin", "installed_version": "2.31-13+deb11u6"},
+      {"vulnerability_id": "CVE-2024-0012", "component_purl": "pkg:maven/com.google.guava/guava@31.0.1-jre", "component_name": "com.google.guava:guava", "installed_version": "31.0.1-jre"}
+    ]
+  },
+  {
+    "product": {
+      "artifact_type": "container_image",
+      "name": "registry.example.com/team/orders-worker:2.0.3",
+      "repo_digests": [
+        "registry.example.com/team/orders-worker@sha256:2222222222222222222222222222222222222222222222222222222222222222"
+      ],
+      "repo_tags": ["registry.example.com/team/orders-worker:2.0.3"],
+      "architecture": "arm64"
+    },
+    "findings": [
+      {"vulnerability_id": "CVE-2024-1001", "component_purl": "pkg:deb/debian/libssl1.1@1.1.1n-0+deb11u5", "component_name": "libssl1.1", "installed_version": "1.1.1n-0+deb11u5"},
+      {"vulnerability_id": "CVE-2024-1002", "component_purl": "pkg:deb/debian/bash@5.1-2+deb11u1", "component_name": "bash", "installed_version": "5.1-2+deb11u1"},
+      {"vulnerability_id": "CVE-2024-1003", "component_purl": "pkg:golang/github.com/open-policy-agent/opa@v0.42.2", "component_name": "github.com/open-policy-agent/opa", "installed_version": "v0.42.2"},
+      {"vulnerability_id": "CVE-2024-1004", "component_purl": "pkg:golang/golang.org/x/net@v0.5.0", "component_name": "golang.org/x/net", "installed_version": "v0.5.0"},
+      {"vulnerability_id": "CVE-2024-1005", "component_purl": "pkg:golang/golang.org/x/crypto@v0.4.0", "component_name": "golang.org/x/crypto", "installed_version": "v0.4.0"},
+      {"vulnerability_id": "CVE-2024-1006", "component_purl": "pkg:deb/debian/curl@7.74.0-1.3+deb11u7", "component_name": "curl", "installed_version": "7.74.0-1.3+deb11u7"},
+      {"vulnerability_id": "CVE-2024-1007", "component_purl": "pkg:deb/debian/libgcrypt20@1.8.7-6", "component_name": "libgcrypt20", "installed_version": "1.8.7-6"},
+      {"vulnerability_id": "CVE-2024-1008", "component_purl": "pkg:deb/debian/ca-certificates@20210119", "component_name": "ca-certificates", "installed_version": "20210119"},
+      {"vulnerability_id": "CVE-2024-1009", "component_purl": "pkg:golang/github.com/go-redis/redis/v8@v8.11.5", "component_name": "github.com/go-redis/redis/v8", "installed_version": "v8.11.5"},
+      {"vulnerability_id": "CVE-2024-1010", "component_purl": "pkg:golang/google.golang.org/protobuf@v1.28.1", "component_name": "google.golang.org/protobuf", "installed_version": "v1.28.1"},
+      {"vulnerability_id": "CVE-2024-1011", "component_purl": "pkg:deb/debian/libxml2@2.9.10+dfsg-6.7+deb11u4", "component_name": "libxml2", "installed_version": "2.9.10+dfsg-6.7+deb11u4"},
+      {"vulnerability_id": "CVE-2024-1012", "component_purl": "pkg:golang/github.com/jackc/pgx/v4@v4.16.1", "component_name": "github.com/jackc/pgx/v4", "installed_version": "v4.16.1"}
+    ]
+  },
+  {
+    "product": {
+      "artifact_type": "container_image",
+      "name": "registry.example.com/team/web-frontend:3.1.7",
+      "repo_digests": [
+        "registry.example.com/team/web-frontend@sha256:3333333333333333333333333333333333333333333333333333333333333333"
+      ],
+      "repo_tags": ["registry.example.com/team/web-frontend:3.1.7", "registry.example.com/team/web-frontend:latest"],
+      "architecture": "amd64"
+    },
+    "findings": [
+      {"vulnerability_id": "CVE-2024-2001", "component_purl": "pkg:npm/axios@0.21.1", "component_name": "axios", "installed_version": "0.21.1"},
+      {"vulnerability_id": "CVE-2024-2002", "component_purl": "pkg:npm/lodash@4.17.20", "component_name": "lodash", "installed_version": "4.17.20", "pkg_path": "node_modules/lodash"},
+      {"vulnerability_id": "CVE-2024-2002", "component_purl": "pkg:npm/lodash@4.17.20", "component_name": "lodash", "installed_version": "4.17.20", "pkg_path": "node_modules/nested/node_modules/lodash"},
+      {"vulnerability_id": "CVE-2024-2003", "component_purl": "pkg:npm/express@4.17.1", "component_name": "express", "installed_version": "4.17.1"},
+      {"vulnerability_id": "CVE-2024-2004", "component_purl": "pkg:npm/debug@2.6.8", "component_name": "debug", "installed_version": "2.6.8"},
+      {"vulnerability_id": "CVE-2024-2005", "component_purl": "pkg:npm/minimist@1.2.5", "component_name": "minimist", "installed_version": "1.2.5"},
+      {"vulnerability_id": "CVE-2024-2006", "component_purl": "pkg:npm/semver@5.7.1", "component_name": "semver", "installed_version": "5.7.1"},
+      {"vulnerability_id": "CVE-2024-2007", "component_purl": "pkg:npm/tar@4.4.13", "component_name": "tar", "installed_version": "4.4.13"},
+      {"vulnerability_id": "CVE-2024-2008", "component_purl": "pkg:npm/ws@5.2.3", "component_name": "ws", "installed_version": "5.2.3"},
+      {"vulnerability_id": "CVE-2024-2009", "component_purl": "pkg:npm/glob-parent@3.1.0", "component_name": "glob-parent", "installed_version": "3.1.0"},
+      {"vulnerability_id": "CVE-2024-2010", "component_purl": "pkg:npm/node-fetch@2.6.1", "component_name": "node-fetch", "installed_version": "2.6.1"},
+      {"vulnerability_id": "CVE-2024-2011", "component_purl": "pkg:deb/debian/nginx@1.18.0-6.1+deb11u3", "component_name": "nginx", "installed_version": "1.18.0-6.1+deb11u3"},
+      {"vulnerability_id": "CVE-2024-2012", "component_purl": "pkg:npm/qs@6.5.2", "component_name": "qs", "installed_version": "6.5.2"}
+    ]
+  }
+]

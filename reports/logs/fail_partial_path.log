@@ -1,0 +1,2 @@
+1 issue(s) block VEX generation:
+  - REVIEW_PATH_PARTIAL: CVE-2024-0004 on pkg:maven/org.springframework/spring-web@5.3.20 appears at 2 package paths but only some were reviewed; unreviewed paths app/WEB-INF/lib2/spring-web-5.3.20.jar would inherit an un-reviewed conclusion, so generation is blocked

@@ -1,0 +1,16 @@
+[
+  {
+    "product": {
+      "artifact_type": "container_image",
+      "name": "registry.example.com/team/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "repo_digests": [
+        "registry.example.com/team/payments-api@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      ],
+      "architecture": "amd64"
+    },
+    "findings": [
+      {"vulnerability_id": "CVE-2024-0004", "component_purl": "pkg:maven/org.springframework/spring-web@5.3.20", "component_name": "spring-web", "installed_version": "5.3.20", "pkg_path": "app/WEB-INF/lib/spring-web-5.3.20.jar"},
+      {"vulnerability_id": "CVE-2024-0004", "component_purl": "pkg:maven/org.springframework/spring-web@5.3.20", "component_name": "spring-web", "installed_version": "5.3.20", "pkg_path": "app/WEB-INF/lib2/spring-web-5.3.20.jar"}
+    ]
+  }
+]
