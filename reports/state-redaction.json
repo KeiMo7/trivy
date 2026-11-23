@@ -1,0 +1,108 @@
+{
+  "artifacts": [
+    {
+      "artifact": "fixtures/sensitive-paths",
+      "coverage": {
+        "abandoned": [
+          {
+            "count": 1,
+            "directory": "<REDACTED:20e8cdb5b4093e18>",
+            "items": [
+              {
+                "container": null,
+                "detail": "PermissionError",
+                "kind": "file",
+                "location": "<REDACTED:20e8cdb5b4093e18>/<REDACTED:b7613dcd3c1cf576>",
+                "location_hash": "62197ea13fe5d400",
+                "reason": "no_permission",
+                "segment_id": null,
+                "size_bytes": null
+              }
+            ],
+            "reason": "no_permission",
+            "total_size_bytes": 0
+          },
+          {
+            "count": 1,
+            "directory": "deploy",
+            "items": [
+              {
+                "container": null,
+                "detail": "PermissionError",
+                "kind": "file",
+                "location": "deploy/<REDACTED:f5e323e2035c4335>",
+                "location_hash": "d3794d5cce1d8fcc",
+                "reason": "no_permission",
+                "segment_id": null,
+                "size_bytes": null
+              }
+            ],
+            "reason": "no_permission",
+            "total_size_bytes": 0
+          }
+        ],
+        "artifact_id": "sensitive-paths",
+        "counters": {
+          "analyzed": 4,
+          "directories_skipped": 0,
+          "directories_traversed": 5,
+          "identity_holds": true,
+          "skipped": 2,
+          "traversed": 6,
+          "unrecognized": 0
+        },
+        "directories": {
+          "skipped": 0,
+          "traversed": 5
+        },
+        "directory_abandoned": [],
+        "fatal_error": null,
+        "findings": [],
+        "skipped_by_reason": {
+          "no_permission": 2,
+          "size_limit": 0,
+          "unpack_failed": 0,
+          "unrecognized": 0
+        },
+        "unreadable_segments": [],
+        "unrecognized": []
+      },
+      "status": "incomplete"
+    }
+  ],
+  "config_effective": {
+    "follow_symlinks": false,
+    "max_archive_depth": 8,
+    "max_archive_members": 10000,
+    "max_file_size": 4096,
+    "max_unpacked_bytes": 268435456,
+    "secret_scan": true
+  },
+  "coverage_fingerprint": "a03d4d2db25c9af7bf4cdbd0eed9129ad3f10ecde333ffdcd7d0cea28862b14e",
+  "generated_at": "2026-11-23T19:23:32.953191+00:00",
+  "kind": "coverage-scan-report",
+  "schema_version": "1.0",
+  "status": "incomplete",
+  "summary": {
+    "totals": {
+      "analyzed": 4,
+      "artifacts": 1,
+      "artifacts_failed": 0,
+      "directories_skipped": 0,
+      "directories_traversed": 5,
+      "findings": 0,
+      "identity_holds": true,
+      "skipped": 2,
+      "skipped_by_reason": {
+        "no_permission": 2,
+        "size_limit": 0,
+        "unpack_failed": 0,
+        "unrecognized": 0
+      },
+      "traversed": 6,
+      "unreadable_segments": 0,
+      "unrecognized": 0
+    },
+    "verdict_text": "INCOMPLETE: no findings but 2 abandoned and 0 unrecognized node(s) were never analyzed"
+  }
+}

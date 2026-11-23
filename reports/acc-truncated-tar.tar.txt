@@ -1,0 +1,20 @@
+========================================================================
+COVERAGE SCAN REPORT  schema=1.0 status=INCOMPLETE
+========================================================================
+INCOMPLETE: no findings but 1 abandoned and 0 unrecognized node(s) were never analyzed
+
+BATCH COVERAGE (reconciliation: traversed = analyzed + abandoned + unrecognized)
+  artifacts=1 (failed=0)  traversed=3  analyzed=2  abandoned=1  unrecognized=0  identity_holds=True
+  abandoned by reason: size_limit=0, no_permission=0, unpack_failed=1, unrecognized=0
+  unreadable segments=1  findings=0  directories skipped=0
+
+------------------------------------------------------------------------
+ARTIFACT fixtures/truncated-tar.tar  status=INCOMPLETE (coverage gap, no findings)
+  traversed=3 analyzed=2 abandoned=1 unrecognized=0 identity_holds=True
+  unreadable segments:
+    - seg-8bce7cf9827fb131 truncated-tar.tar (tar): ReadError: unexpected end of data affected_packages=[*tail*, package]
+  abandoned (aggregated by reason + directory):
+    * unpack_failed @ . count=1 size=1876B
+        - truncated-tar.tar [segment] 1876B detail=ReadError: unexpected end of data
+
+coverage_fingerprint=bbdd1b69fe773322c8b84c9ede5e4221345810735bad03af2bd3dd72c87adf33

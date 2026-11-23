@@ -1,0 +1,184 @@
+{
+  "artifacts": [
+    {
+      "artifact": "fixtures/clean-artifact",
+      "coverage": {
+        "abandoned": [],
+        "artifact_id": "clean-artifact",
+        "counters": {
+          "analyzed": 3,
+          "directories_skipped": 0,
+          "directories_traversed": 2,
+          "identity_holds": true,
+          "skipped": 0,
+          "traversed": 3,
+          "unrecognized": 0
+        },
+        "directories": {
+          "skipped": 0,
+          "traversed": 2
+        },
+        "directory_abandoned": [],
+        "fatal_error": null,
+        "findings": [],
+        "skipped_by_reason": {
+          "no_permission": 0,
+          "size_limit": 0,
+          "unpack_failed": 0,
+          "unrecognized": 0
+        },
+        "unreadable_segments": [],
+        "unrecognized": []
+      },
+      "status": "clean"
+    },
+    {
+      "artifact": "fixtures/secrets-artifact",
+      "coverage": {
+        "abandoned": [],
+        "artifact_id": "secrets-artifact",
+        "counters": {
+          "analyzed": 3,
+          "directories_skipped": 0,
+          "directories_traversed": 1,
+          "identity_holds": true,
+          "skipped": 0,
+          "traversed": 3,
+          "unrecognized": 0
+        },
+        "directories": {
+          "skipped": 0,
+          "traversed": 1
+        },
+        "directory_abandoned": [],
+        "fatal_error": null,
+        "findings": [
+          {
+            "line_hint": 1,
+            "location": "<REDACTED:49f33156634b57cb>",
+            "location_hash": "49f33156634b57cb",
+            "rule_id": "github-pat"
+          },
+          {
+            "line_hint": 1,
+            "location": "<REDACTED:e26c2fbabf42953e>",
+            "location_hash": "e26c2fbabf42953e",
+            "rule_id": "private-key-pem"
+          },
+          {
+            "line_hint": 2,
+            "location": "config.ini",
+            "location_hash": "0795adfe01df662f",
+            "rule_id": "aws-access-key-id"
+          }
+        ],
+        "skipped_by_reason": {
+          "no_permission": 0,
+          "size_limit": 0,
+          "unpack_failed": 0,
+          "unrecognized": 0
+        },
+        "unreadable_segments": [],
+        "unrecognized": []
+      },
+      "status": "findings"
+    },
+    {
+      "artifact": "fixtures/truncated-zip.zip",
+      "coverage": {
+        "abandoned": [
+          {
+            "count": 1,
+            "directory": ".",
+            "items": [
+              {
+                "container": null,
+                "detail": "BadZipFile: File is not a zip file",
+                "kind": "segment",
+                "location": "truncated-zip.zip",
+                "location_hash": "32a2b31a7c8f2fb8",
+                "reason": "unpack_failed",
+                "segment_id": "seg-32a2b31a7c8f2fb8",
+                "size_bytes": 315
+              }
+            ],
+            "reason": "unpack_failed",
+            "total_size_bytes": 315
+          }
+        ],
+        "artifact_id": "truncated-zip.zip",
+        "counters": {
+          "analyzed": 0,
+          "directories_skipped": 0,
+          "directories_traversed": 0,
+          "identity_holds": true,
+          "skipped": 1,
+          "traversed": 1,
+          "unrecognized": 0
+        },
+        "directories": {
+          "skipped": 0,
+          "traversed": 0
+        },
+        "directory_abandoned": [],
+        "fatal_error": null,
+        "findings": [],
+        "skipped_by_reason": {
+          "no_permission": 0,
+          "size_limit": 0,
+          "unpack_failed": 1,
+          "unrecognized": 0
+        },
+        "unreadable_segments": [
+          {
+            "affected_packages": [
+              "*"
+            ],
+            "detail": "BadZipFile: File is not a zip file",
+            "format": "zip",
+            "location": "truncated-zip.zip",
+            "location_hash": "32a2b31a7c8f2fb8",
+            "segment_id": "seg-32a2b31a7c8f2fb8"
+          }
+        ],
+        "unrecognized": []
+      },
+      "status": "incomplete"
+    }
+  ],
+  "config_effective": {
+    "follow_symlinks": false,
+    "max_archive_depth": 8,
+    "max_archive_members": 10000,
+    "max_file_size": 4096,
+    "max_unpacked_bytes": 268435456,
+    "secret_scan": true
+  },
+  "coverage_fingerprint": "58cb3394a57f1fe8e90de4781dc824b780608e2a2b1878f604f3e4fb1c19e112",
+  "generated_at": "2026-11-23T19:23:32.791724+00:00",
+  "kind": "coverage-scan-report",
+  "schema_version": "1.0",
+  "status": "findings_incomplete",
+  "summary": {
+    "totals": {
+      "analyzed": 6,
+      "artifacts": 3,
+      "artifacts_failed": 0,
+      "directories_skipped": 0,
+      "directories_traversed": 3,
+      "findings": 3,
+      "identity_holds": true,
+      "skipped": 1,
+      "skipped_by_reason": {
+        "no_permission": 0,
+        "size_limit": 0,
+        "unpack_failed": 1,
+        "unrecognized": 0
+      },
+      "traversed": 7,
+      "unreadable_segments": 1,
+      "unrecognized": 0
+    },
+    "verdict_text": "FINDINGS + INCOMPLETE: 3 finding(s), 1 abandoned, 0 unrecognized -- coverage is not complete"
+  }
+}

@@ -1,0 +1,26 @@
+========================================================================
+COVERAGE SCAN REPORT  schema=1.0 status=INCOMPLETE
+========================================================================
+INCOMPLETE: no findings but 3 abandoned and 1 unrecognized node(s) were never analyzed
+
+BATCH COVERAGE (reconciliation: traversed = analyzed + abandoned + unrecognized)
+  artifacts=1 (failed=0)  traversed=5  analyzed=1  abandoned=3  unrecognized=1  identity_holds=True
+  abandoned by reason: size_limit=1, no_permission=1, unpack_failed=1, unrecognized=1
+  unreadable segments=1  findings=0  directories skipped=0
+
+------------------------------------------------------------------------
+ARTIFACT fixtures/mixed-batch  status=INCOMPLETE (coverage gap, no findings)
+  traversed=5 analyzed=1 abandoned=3 unrecognized=1 identity_holds=True
+  unreadable segments:
+    - seg-1e4cfda3ed5786ab packs/broken.zip (zip): BadZipFile: File is not a zip file affected_packages=[*]
+  abandoned (aggregated by reason + directory):
+    * no_permission @ noaccess count=1 size=0B
+        - noaccess/<REDACTED:b7613dcd3c1cf576> [file] ?B detail=PermissionError
+    * size_limit @ big count=1 size=8192B
+        - big/overflow.bin [file] 8192B detail=size 8192 > limit 4096
+    * unpack_failed @ packs count=1 size=130B
+        - packs/broken.zip [segment] 130B detail=BadZipFile: File is not a zip file
+  unrecognized content (counts per directory, no per-file dump):
+    * weird count=1 size=303B extensions=.qqq
+
+coverage_fingerprint=9085f18c855c5225bb86075921a9f7ccee8bb905276b14ab8366e2dcd69469a1

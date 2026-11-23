@@ -1,0 +1,18 @@
+========================================================================
+COVERAGE SCAN REPORT  schema=1.0 status=INCOMPLETE
+========================================================================
+INCOMPLETE: no findings but 1 abandoned and 0 unrecognized node(s) were never analyzed
+
+BATCH COVERAGE (reconciliation: traversed = analyzed + abandoned + unrecognized)
+  artifacts=1 (failed=0)  traversed=2  analyzed=1  abandoned=1  unrecognized=0  identity_holds=True
+  abandoned by reason: size_limit=0, no_permission=1, unpack_failed=0, unrecognized=0
+  unreadable segments=0  findings=0  directories skipped=0
+
+------------------------------------------------------------------------
+ARTIFACT fixtures/noperm-artifact  status=INCOMPLETE (coverage gap, no findings)
+  traversed=2 analyzed=1 abandoned=1 unrecognized=0 identity_holds=True
+  abandoned (aggregated by reason + directory):
+    * no_permission @ . count=1 size=0B
+        - locked.bin [file] ?B detail=PermissionError
+
+coverage_fingerprint=672d883b62bf53bab8bb2b923d97ec430711d6cd4d294c477145a7563cadb0d1

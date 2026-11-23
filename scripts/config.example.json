@@ -1,0 +1,19 @@
+{
+  "max_file_size": 1048576,
+  "max_archive_depth": 8,
+  "max_archive_members": 10000,
+  "max_unpacked_bytes": 268435456,
+  "follow_symlinks": false,
+  "secret_scan": true,
+  "redaction_rules": [
+    "(?i)id_rsa",
+    "(?i)id_ed25519",
+    "(?i)\\.pem$",
+    "(?i)\\.key$",
+    "(?i)\\.env$",
+    "(?i)credentials?",
+    "(?i)secret[s]?",
+    "(?i)token",
+    "(?i)password"
+  ]
+}

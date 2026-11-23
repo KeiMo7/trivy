@@ -1,0 +1,18 @@
+========================================================================
+COVERAGE SCAN REPORT  schema=1.0 status=INCOMPLETE
+========================================================================
+INCOMPLETE: no findings but 0 abandoned and 3 unrecognized node(s) were never analyzed
+
+BATCH COVERAGE (reconciliation: traversed = analyzed + abandoned + unrecognized)
+  artifacts=1 (failed=0)  traversed=3  analyzed=0  abandoned=0  unrecognized=3  identity_holds=True
+  abandoned by reason: size_limit=0, no_permission=0, unpack_failed=0, unrecognized=3
+  unreadable segments=0  findings=0  directories skipped=0
+
+------------------------------------------------------------------------
+ARTIFACT fixtures/unknown-blob  status=INCOMPLETE (coverage gap, no findings)
+  traversed=3 analyzed=0 abandoned=0 unrecognized=3 identity_holds=True
+  unrecognized content (counts per directory, no per-file dump):
+    * . count=2 size=1512B extensions=.xyz,.zzz
+    * nested count=1 size=260B extensions=.bin
+
+coverage_fingerprint=851d0501caf27cd56210019953199a72951f7819e24ab04e04002cca6bb04791

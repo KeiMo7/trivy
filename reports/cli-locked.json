@@ -1,0 +1,71 @@
+{
+  "artifacts": [
+    {
+      "artifact": "/home/wll/uid2/fixtures/cli-locked-root",
+      "coverage": {
+        "abandoned": [],
+        "artifact_id": "cli-locked-root",
+        "counters": {
+          "analyzed": 0,
+          "directories_skipped": 0,
+          "directories_traversed": 0,
+          "identity_holds": true,
+          "skipped": 0,
+          "traversed": 0,
+          "unrecognized": 0
+        },
+        "directories": {
+          "skipped": 0,
+          "traversed": 0
+        },
+        "directory_abandoned": [],
+        "fatal_error": "artifact root not readable: PermissionError",
+        "findings": [],
+        "skipped_by_reason": {
+          "no_permission": 0,
+          "size_limit": 0,
+          "unpack_failed": 0,
+          "unrecognized": 0
+        },
+        "unreadable_segments": [],
+        "unrecognized": []
+      },
+      "status": "failed"
+    }
+  ],
+  "config_effective": {
+    "follow_symlinks": false,
+    "max_archive_depth": 8,
+    "max_archive_members": 10000,
+    "max_file_size": 1048576,
+    "max_unpacked_bytes": 268435456,
+    "secret_scan": true
+  },
+  "coverage_fingerprint": "172df300f9c5da6204b690e8bb03ec54b8630f2f06af41bbc8b892ed0df3a445",
+  "generated_at": "2026-11-23T19:23:31.944758+00:00",
+  "kind": "coverage-scan-report",
+  "schema_version": "1.0",
+  "status": "failed",
+  "summary": {
+    "totals": {
+      "analyzed": 0,
+      "artifacts": 1,
+      "artifacts_failed": 1,
+      "directories_skipped": 0,
+      "directories_traversed": 0,
+      "findings": 0,
+      "identity_holds": true,
+      "skipped": 0,
+      "skipped_by_reason": {
+        "no_permission": 0,
+        "size_limit": 0,
+        "unpack_failed": 0,
+        "unrecognized": 0
+      },
+      "traversed": 0,
+      "unreadable_segments": 0,
+      "unrecognized": 0
+    },
+    "verdict_text": "FAILED: every artifact failed before scanning; no coverage conclusion is available"
+  }
+}

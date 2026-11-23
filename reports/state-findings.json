@@ -1,0 +1,90 @@
+{
+  "artifacts": [
+    {
+      "artifact": "fixtures/secrets-artifact",
+      "coverage": {
+        "abandoned": [],
+        "artifact_id": "secrets-artifact",
+        "counters": {
+          "analyzed": 3,
+          "directories_skipped": 0,
+          "directories_traversed": 1,
+          "identity_holds": true,
+          "skipped": 0,
+          "traversed": 3,
+          "unrecognized": 0
+        },
+        "directories": {
+          "skipped": 0,
+          "traversed": 1
+        },
+        "directory_abandoned": [],
+        "fatal_error": null,
+        "findings": [
+          {
+            "line_hint": 1,
+            "location": "<REDACTED:49f33156634b57cb>",
+            "location_hash": "49f33156634b57cb",
+            "rule_id": "github-pat"
+          },
+          {
+            "line_hint": 1,
+            "location": "<REDACTED:e26c2fbabf42953e>",
+            "location_hash": "e26c2fbabf42953e",
+            "rule_id": "private-key-pem"
+          },
+          {
+            "line_hint": 2,
+            "location": "config.ini",
+            "location_hash": "0795adfe01df662f",
+            "rule_id": "aws-access-key-id"
+          }
+        ],
+        "skipped_by_reason": {
+          "no_permission": 0,
+          "size_limit": 0,
+          "unpack_failed": 0,
+          "unrecognized": 0
+        },
+        "unreadable_segments": [],
+        "unrecognized": []
+      },
+      "status": "findings"
+    }
+  ],
+  "config_effective": {
+    "follow_symlinks": false,
+    "max_archive_depth": 8,
+    "max_archive_members": 10000,
+    "max_file_size": 4096,
+    "max_unpacked_bytes": 268435456,
+    "secret_scan": true
+  },
+  "coverage_fingerprint": "8f742cedb2263b9e0012946554425447394015b9cd6c7d63210fe6bb776e7c73",
+  "generated_at": "2026-11-23T19:23:32.700414+00:00",
+  "kind": "coverage-scan-report",
+  "schema_version": "1.0",
+  "status": "findings",
+  "summary": {
+    "totals": {
+      "analyzed": 3,
+      "artifacts": 1,
+      "artifacts_failed": 0,
+      "directories_skipped": 0,
+      "directories_traversed": 1,
+      "findings": 3,
+      "identity_holds": true,
+      "skipped": 0,
+      "skipped_by_reason": {
+        "no_permission": 0,
+        "size_limit": 0,
+        "unpack_failed": 0,
+        "unrecognized": 0
+      },
+      "traversed": 3,
+      "unreadable_segments": 0,
+      "unrecognized": 0
+    },
+    "verdict_text": "FINDINGS: 3 finding(s) with full coverage"
+  }
+}

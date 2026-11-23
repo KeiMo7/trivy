@@ -1,0 +1,20 @@
+========================================================================
+COVERAGE SCAN REPORT  schema=1.0 status=INCOMPLETE
+========================================================================
+INCOMPLETE: no findings but 1 abandoned and 0 unrecognized node(s) were never analyzed
+
+BATCH COVERAGE (reconciliation: traversed = analyzed + abandoned + unrecognized)
+  artifacts=1 (failed=0)  traversed=1  analyzed=0  abandoned=1  unrecognized=0  identity_holds=True
+  abandoned by reason: size_limit=0, no_permission=0, unpack_failed=1, unrecognized=0
+  unreadable segments=1  findings=0  directories skipped=0
+
+------------------------------------------------------------------------
+ARTIFACT fixtures/truncated-zip.zip  status=INCOMPLETE (coverage gap, no findings)
+  traversed=1 analyzed=0 abandoned=1 unrecognized=0 identity_holds=True
+  unreadable segments:
+    - seg-32a2b31a7c8f2fb8 truncated-zip.zip (zip): BadZipFile: File is not a zip file affected_packages=[*]
+  abandoned (aggregated by reason + directory):
+    * unpack_failed @ . count=1 size=315B
+        - truncated-zip.zip [segment] 315B detail=BadZipFile: File is not a zip file
+
+coverage_fingerprint=9b179a44f26a8448652428d6689aea7d0c8a738e773a96aa997987ae9fd6b050

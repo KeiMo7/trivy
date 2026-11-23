@@ -1,0 +1,121 @@
+{
+  "artifacts": [
+    {
+      "artifact": "fixtures/member-truncated.tar",
+      "coverage": {
+        "abandoned": [
+          {
+            "count": 1,
+            "directory": ".",
+            "items": [
+              {
+                "container": null,
+                "detail": "ReadError: unexpected end of data",
+                "kind": "segment",
+                "location": "member-truncated.tar",
+                "location_hash": "48231ee48917bfcb",
+                "reason": "unpack_failed",
+                "segment_id": "seg-48231ee48917bfcb",
+                "size_bytes": 1586
+              }
+            ],
+            "reason": "unpack_failed",
+            "total_size_bytes": 1586
+          },
+          {
+            "count": 1,
+            "directory": "member-truncated.tar",
+            "items": [
+              {
+                "container": "member-truncated.tar",
+                "detail": "ReadError: unexpected end of data",
+                "kind": "archive_member",
+                "location": "member-truncated.tar/broken.txt",
+                "location_hash": "b65e800f093a7e83",
+                "reason": "unpack_failed",
+                "segment_id": "seg-48231ee48917bfcb",
+                "size_bytes": 2000
+              }
+            ],
+            "reason": "unpack_failed",
+            "total_size_bytes": 2000
+          }
+        ],
+        "artifact_id": "member-truncated.tar",
+        "counters": {
+          "analyzed": 1,
+          "directories_skipped": 0,
+          "directories_traversed": 0,
+          "identity_holds": true,
+          "skipped": 2,
+          "traversed": 3,
+          "unrecognized": 0
+        },
+        "directories": {
+          "skipped": 0,
+          "traversed": 0
+        },
+        "directory_abandoned": [],
+        "fatal_error": null,
+        "findings": [],
+        "skipped_by_reason": {
+          "no_permission": 0,
+          "size_limit": 0,
+          "unpack_failed": 2,
+          "unrecognized": 0
+        },
+        "unreadable_segments": [
+          {
+            "affected_packages": [
+              "*tail*",
+              "broken.txt",
+              "good.txt"
+            ],
+            "detail": "ReadError: unexpected end of data",
+            "format": "tar",
+            "location": "member-truncated.tar",
+            "location_hash": "48231ee48917bfcb",
+            "segment_id": "seg-48231ee48917bfcb"
+          }
+        ],
+        "unrecognized": []
+      },
+      "status": "incomplete"
+    }
+  ],
+  "config_effective": {
+    "follow_symlinks": false,
+    "max_archive_depth": 8,
+    "max_archive_members": 10000,
+    "max_file_size": 4096,
+    "max_unpacked_bytes": 268435456,
+    "secret_scan": true
+  },
+  "coverage_fingerprint": "2178ea2ae6735f53aaf7336903e864d132bdd0bdcd9d4f33938e82be2652a51c",
+  "generated_at": "2026-11-23T19:21:52.162758+00:00",
+  "kind": "coverage-scan-report",
+  "schema_version": "1.0",
+  "status": "incomplete",
+  "summary": {
+    "totals": {
+      "analyzed": 1,
+      "artifacts": 1,
+      "artifacts_failed": 0,
+      "directories_skipped": 0,
+      "directories_traversed": 0,
+      "findings": 0,
+      "identity_holds": true,
+      "skipped": 2,
+      "skipped_by_reason": {
+        "no_permission": 0,
+        "size_limit": 0,
+        "unpack_failed": 2,
+        "unrecognized": 0
+      },
+      "traversed": 3,
+      "unreadable_segments": 1,
+      "unrecognized": 0
+    },
+    "verdict_text": "INCOMPLETE: no findings but 2 abandoned and 0 unrecognized node(s) were never analyzed"
+  }
+}

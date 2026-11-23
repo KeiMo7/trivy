@@ -1,0 +1,20 @@
+========================================================================
+COVERAGE SCAN REPORT  schema=1.0 status=INCOMPLETE
+========================================================================
+INCOMPLETE: no findings but 2 abandoned and 0 unrecognized node(s) were never analyzed
+
+BATCH COVERAGE (reconciliation: traversed = analyzed + abandoned + unrecognized)
+  artifacts=1 (failed=0)  traversed=3  analyzed=1  abandoned=2  unrecognized=0  identity_holds=True
+  abandoned by reason: size_limit=2, no_permission=0, unpack_failed=0, unrecognized=0
+  unreadable segments=0  findings=0  directories skipped=0
+
+------------------------------------------------------------------------
+ARTIFACT fixtures/oversized-artifact  status=INCOMPLETE (coverage gap, no findings)
+  traversed=3 analyzed=1 abandoned=2 unrecognized=0 identity_holds=True
+  abandoned (aggregated by reason + directory):
+    * size_limit @ . count=1 size=8192B
+        - huge.bin [file] 8192B detail=size 8192 > limit 4096
+    * size_limit @ nested count=1 size=12288B
+        - nested/also-huge.log [file] 12288B detail=size 12288 > limit 4096
+
+coverage_fingerprint=d21e2f995a99889959e1ddfe0ae7de0aec428e2868aabfa4f061f40519c327aa

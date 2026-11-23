@@ -43,3 +43,8 @@ cmd/trivy/trivy
 
 # RPM
 *.rpm
+
+# Coverage-aware scanner (UID 2): generated untrusted fixtures and Python caches
+/fixtures/
+__pycache__/
+*.pyc

@@ -1,0 +1,20 @@
+========================================================================
+COVERAGE SCAN REPORT  schema=1.0 status=INCOMPLETE
+========================================================================
+INCOMPLETE: no findings but 1 abandoned and 0 unrecognized node(s) were never analyzed
+
+BATCH COVERAGE (reconciliation: traversed = analyzed + abandoned + unrecognized)
+  artifacts=1 (failed=0)  traversed=1  analyzed=0  abandoned=1  unrecognized=0  identity_holds=True
+  abandoned by reason: size_limit=0, no_permission=0, unpack_failed=1, unrecognized=0
+  unreadable segments=1  findings=0  directories skipped=0
+
+------------------------------------------------------------------------
+ARTIFACT fixtures/truncated-gz.gz  status=INCOMPLETE (coverage gap, no findings)
+  traversed=1 analyzed=0 abandoned=1 unrecognized=0 identity_holds=True
+  unreadable segments:
+    - seg-3b1105148e9514bd truncated-gz.gz (gzip): EOFError: Compressed file ended before the end-of-stream marker was reached affected_packages=[*]
+  abandoned (aggregated by reason + directory):
+    * unpack_failed @ . count=1 size=20B
+        - truncated-gz.gz [segment] 20B detail=EOFError: Compressed file ended before the end-of-stream marker was reached
+
+coverage_fingerprint=fcaf36e306c71f6fdefc27f1fd494b8cb1d3be8220660514424972b97df22b3a
