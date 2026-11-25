@@ -83,10 +83,13 @@ func (fs FSCache) GetBlob(_ context.Context, blobID string) (types.BlobInfo, err
 
 func (fs FSCache) getBlob(blobBucket *bolt.Bucket, diffID string) (types.BlobInfo, error) {
 	b := blobBucket.Get([]byte(diffID))
+	if b == nil {
+		return types.BlobInfo{}, xerrors.Errorf("blob (%s): %w", diffID, ErrBlobNotFound)
+	}
 
 	var l types.BlobInfo
 	if err := json.Unmarshal(b, &l); err != nil {
-		return types.BlobInfo{}, xerrors.Errorf("JSON unmarshal error: %w", err)
+		return types.BlobInfo{}, xerrors.Errorf("JSON unmarshal error (%s): %w", diffID, err)
 	}
 	return l, nil
 }
@@ -124,6 +127,9 @@ func (fs FSCache) GetArtifact(_ context.Context, artifactID string) (types.Artif
 	}
 
 	var info types.ArtifactInfo
+	if blob == nil {
+		return types.ArtifactInfo{}, xerrors.Errorf("artifact (%s): %w", artifactID, ErrArtifactNotFound)
+	}
 	if err := json.Unmarshal(blob, &info); err != nil {
 		return types.ArtifactInfo{}, xerrors.Errorf("JSON unmarshal error: %w", err)
 	}

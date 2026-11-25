@@ -44,7 +44,7 @@ func (c *MemoryCache) DeleteBlobs(_ context.Context, blobIDs []string) error {
 func (c *MemoryCache) GetArtifact(_ context.Context, artifactID string) (types.ArtifactInfo, error) {
 	info, ok := c.artifacts.Load(artifactID)
 	if !ok {
-		return types.ArtifactInfo{}, xerrors.Errorf("artifact (%s) not found in memory cache", artifactID)
+		return types.ArtifactInfo{}, xerrors.Errorf("artifact (%s) not found in memory cache: %w", artifactID, ErrArtifactNotFound)
 	}
 	artifactInfo, ok := info.(types.ArtifactInfo)
 	if !ok {
@@ -57,7 +57,7 @@ func (c *MemoryCache) GetArtifact(_ context.Context, artifactID string) (types.A
 func (c *MemoryCache) GetBlob(_ context.Context, blobID string) (types.BlobInfo, error) {
 	info, ok := c.blobs.Load(blobID)
 	if !ok {
-		return types.BlobInfo{}, xerrors.Errorf("blob (%s) not found in memory cache", blobID)
+		return types.BlobInfo{}, xerrors.Errorf("blob (%s) not found in memory cache: %w", blobID, ErrBlobNotFound)
 	}
 	blobInfo, ok := info.(types.BlobInfo)
 	if !ok {

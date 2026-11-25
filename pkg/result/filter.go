@@ -2,7 +2,6 @@ package result
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -82,7 +81,10 @@ func FilterResult(ctx context.Context, result *types.Result, ignoreConf IgnoreCo
 }
 
 func filterVulnerabilities(result *types.Result, severities []string, ignoreStatuses []dbTypes.Status, ignoreConfig IgnoreConfig) {
-	uniqVulns := make(map[string]types.DetectedVulnerability)
+	// Severity/status filtering and ignore-file matching happen first. Ignored
+	// findings are recorded in ModifiedFindings and leave the candidate set, so
+	// de-duplication below can never make an ignored finding disappear.
+	var candidates []types.DetectedVulnerability
 	for _, vuln := range result.Vulnerabilities {
 		if vuln.Severity == "" {
 			vuln.Severity = dbTypes.SeverityUnknown.String()
@@ -104,19 +106,12 @@ func filterVulnerabilities(result *types.Result, severities []string, ignoreStat
 			continue
 		}
 
-		// Check if there is a duplicate vulnerability
-		key := fmt.Sprintf("%s/%s/%s/%s/%s", vuln.VulnerabilityID, vuln.PkgID, vuln.PkgName, vuln.InstalledVersion, vuln.PkgPath)
-		if old, ok := uniqVulns[key]; ok && !shouldOverwrite(old, vuln) {
-			continue
-		}
-		uniqVulns[key] = vuln
+		candidates = append(candidates, vuln)
 	}
 
-	// Override the detected vulnerabilities
-	result.Vulnerabilities = lo.Values(uniqVulns)
-	if len(result.Vulnerabilities) == 0 {
-		result.Vulnerabilities = nil
-	}
+	// De-duplicate cross-target duplicates (e.g. the same CVE in apk and jar
+	// packages) after filtering, with a deterministic total ordering.
+	result.Vulnerabilities = DedupVulnerabilities(candidates)
 }
 
 func filterMisconfigurations(result *types.Result, severities []string, includeNonFailures bool,
@@ -344,9 +339,4 @@ func evaluate[T types.Finding](ctx context.Context, query rego.PreparedEvalQuery
 		return false, xerrors.New("the policy must return boolean")
 	}
 	return ignore, nil
-}
-
-func shouldOverwrite(oldVuln, newVuln types.DetectedVulnerability) bool {
-	// The same vulnerability must be picked always.
-	return oldVuln.FixedVersion < newVuln.FixedVersion
 }
